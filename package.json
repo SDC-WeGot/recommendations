@@ -1,17 +1,33 @@
 {
-  "name": "",
+  "name": "WeGot-Recommendations",
   "version": "",
-  "description": "",
-  "author": "",
-  "license": "",
+  "description": "nearby recommendations",
+  "author": "Stacy Lin",
+  "license": "MIT",
   "engines": {
     "node": ">=6.13.0"
   },
   "scripts": {
+    "server": "nodemon ./server/index.js",
+    "dev-react": "webpack -d --watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "dependencies": {
+    "babel-core": "^6.17.0",
+    "body-parser": "^1.15.2",
+    "express": "^4.14.0",
+    "jquery": "^3.1.1",
+    "mongoose": "^4.6.4",
+    "react": "^15.3.2",
+    "react-dom": "^15.3.2",
+    "request": "^2.75.0"
   },
   "devDependencies": {
-    "eslint-config-hackreactor": "git://github.com/reactorcore/eslint-config-hackreactor"
+    "eslint-config-hackreactor": "git://github.com/reactorcore/eslint-config-hackreactor",
+    "babel-loader": "^6.2.5",
+    "babel-preset-es2015": "^6.16.0",
+    "babel-preset-react": "^6.16.0",
+    "nodemon": "^1.11.0",
+    "webpack": "^1.13.2"
   }
 }

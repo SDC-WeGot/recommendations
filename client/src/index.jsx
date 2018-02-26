@@ -1,5 +1,6 @@
 import React from 'react';
 import ReactDOM  from 'react-dom';
+import RestaurantCard from './components/RestaurantCard.jsx'
 
 class App extends React.Component{
   constructor(props){
@@ -7,9 +8,15 @@ class App extends React.Component{
   }
 
   render(){
+
     return(
-      <div>
-        Hello from App!
+      <div className="recommendations-container">
+        <RestaurantCard/>
+        <RestaurantCard/>
+        <RestaurantCard/>
+        <RestaurantCard/>
+        <RestaurantCard/>
+        <RestaurantCard/>
       </div>
     )
   }

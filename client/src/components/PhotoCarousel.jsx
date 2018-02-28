@@ -5,23 +5,19 @@ class PhotoCarousel extends React.Component {
     super(props);
 
     this.state = {
-      photoIndex: 0,
+      photoIndex: 0
     }
   }
 
   nextPhoto(){
-    // console.log('next photo please');
     var numPhotos = this.props.photos.length;
     var newIndex = (this.state.photoIndex + 1) % numPhotos;
     this.setState({ photoIndex: newIndex })
-                    // () => console.log(this.state.photoIndex) );
   }
   prevPhoto(){
-    // console.log('prev photo please');
     var numPhotos = this.props.photos.length;
     var newIndex = (this.state.photoIndex - 1 + numPhotos) % numPhotos;
     this.setState({ photoIndex: newIndex })
-                    // () => console.log(this.state.photoIndex) );
   }
 
   render(){

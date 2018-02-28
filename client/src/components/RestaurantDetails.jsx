@@ -1,9 +1,11 @@
 import React from 'react';
 
 const RestaurantDetails = (props) => {
+  const {restaurant} = props;
+
   return(
     <div className="restaurant-details">
-      <div className="details-title">MAVEN</div>
+      <div className="details-title">{restaurant.name}</div>
       <div className="details-tags">Californian · Lower Haight · $$</div>
       <div className="details-ratings">
         <img src="/zagat-logo-icon.png" className="zagat-rating-icon"></img><span className="zagat-rating">Food </span><span className="zagat-rating-value">4.3</span><div className="rating-divider"></div>

@@ -8,8 +8,6 @@ body{
   padding-left: 40px;
 }
 .restaurant-card{
-/*  display: grid;
-  grid-template-columns: 2fr 3fr;*/
   display: flex;
   height: 218px;
   margin-right: 40px;
@@ -18,10 +16,47 @@ body{
   background-color: #ffffff;
 }
 .photo-carousel{
-  /*border: solid 1px black;*/
-  /*display:;*/
   flex: 2;
-  display: block;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.arrow-left{
+  position: absolute;
+  align-self: flex-start;
+  height: 40px;
+  width: 40px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: white;
+}
+.arrow-left:hover{
+  background: black;
+  cursor: pointer;
+}
+.arrow-left:focus{
+  outline: 0;
+}
+.arrow-right{
+  position: absolute;
+  align-self: flex-end;
+  height: 40px;
+  width: 40px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: white;
+}
+.arrow-right:hover{
+  background: black;
+  cursor: pointer;
+}
+.arrow-right:focus{
+  outline: 0;
 }
 .restaurant-photos{
   display: block;

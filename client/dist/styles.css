@@ -1,8 +1,12 @@
 body{
   background-color: #f1f1f2;
 }
+.recommendations-container{
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  padding-left: 40px;
+}
 .restaurant-card{
-  /*border: solid 1px black;*/
   display: grid;
   grid-template-columns: 2fr 3fr;
   height: 228px;
@@ -13,14 +17,77 @@ body{
 }
 .photo-carousel{
   border: solid 1px black;
-
 }
 .restaurant-details{
-  /*border: solid 1px black;*/
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding: 20px 24px
 }
-.recommendations-container{
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  padding-left: 40px;
+.details-title{
+  letter-spacing: .05em;
+  text-transform: uppercase;
+}
+.details-tags{
+  color: #656666;
+  font-size: 12px;
+  letter-spacing: .05em;
+  margin: 5px 0;
+  font-weight: 300;
+}
+.details-ratings{
+  letter-spacing: .05em;
+  display: flex;
+  align-items: center;
+}
+.zagat-rating-icon{
+  height: 22px;
+  padding-right: 5px;
+}
+.zagat-rating{
+  text-transform: uppercase;
+  font-size: 12px;
+  margin-right: 5px;
+}
+.zagat-rating-value{
+  color: #b70038;
+  font-size: 12px;
+}
+.rating-divider{
+  border-right: 1px solid #d0d2d3;
+  height: 20px;
+  margin: 0 10px;
+}
+.google-rating-icon{
+  height: 18px;
+  padding-right: 5px;
+}
+.google-rating-value{
+  font-size: 12px;
+  margin-right: 5px;
+}
+.google-rating-stars{
+  position: relative;
+}
+.star-ratings-top{
+  font-size: 10px;
+  line-height: 1.6;
+  color: #101820;
+  position: absolute;
+  overflow: hidden;
+}
+.star-ratings-bottom{
+  font-size: 10px;
+  line-height: 1.6;
+  color: #CFD1D2;
+}
+.google-rating-count{
+  font-size: 12px;
+  margin-left: 5px;
+}
+.details-description{
+  font-size: 12px;
+  letter-spacing: .05em;
+  margin-top: 5px;
+  line-height: 1.6;
 }

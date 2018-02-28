@@ -8,10 +8,11 @@ class RestaurantCard extends React.Component {
   }
 
   render(){
+    const {restaurant} = this.props;
     return(
       <div className="restaurant-card">
-        <PhotoCarousel />
-        <RestaurantDetails />
+        <PhotoCarousel photos={restaurant.photos} />
+        <RestaurantDetails restaurant={restaurant} />
 
       </div>
     )

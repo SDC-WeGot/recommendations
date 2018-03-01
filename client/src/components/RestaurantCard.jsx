@@ -13,7 +13,6 @@ class RestaurantCard extends React.Component {
       <div className="restaurant-card">
         <PhotoCarousel photos={restaurant.photos} />
         <RestaurantDetails restaurant={restaurant} />
-
       </div>
     )
   }

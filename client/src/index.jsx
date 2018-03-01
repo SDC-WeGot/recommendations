@@ -3,11 +3,32 @@ import ReactDOM  from 'react-dom';
 import RestaurantCard from './components/RestaurantCard.jsx'
 
 const Restaurants = [
-  {name: 'Maven', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj', 'https://lh3.ggpht.com/p/AF1QipNrd_l95_GAu4NjXMo8lvafHxAtvoHLjjXVbfxf=s224-c-v1-rj']},
-  {name: 'A', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj']},
-  {name: 'B', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj']},
-  {name: 'C', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj']},
-  {name: 'D', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj']},
+  {
+    "name": "Clift San Francisco",
+    "place_id": "ChIJFUBxSY6AhYARwOaLV7TsLjw",
+    "google_rating": 4.5,
+    "zagat_food_rating": 4.2,
+    "review_count": 5,
+    "photos": ['https://lh3.ggpht.com/p/AF1QipOmG5kSEr7yGQ2I_n6ndK9BLWeBR5PHiGzgAL0c=s224-c-v1-rj','https://lh3.ggpht.com/p/AF1QipNwMDHKJN6Q3Ki_r5BMQlxxlRydIBaVrBB1Kn2E=s224-c-v1-rj','https://lh3.ggpht.com/p/AF1QipN_uh48A1uuotg0zLYLZarrE_bwgMKqqk5VRROY=s224-c-v1-rj','https://lh3.ggpht.com/p/AF1QipPEDQ6Zo_inisz8htJBszIiHvZPghOg7ofTsKZa=s224-c-v1-rj','https://lh3.ggpht.com/p/AF1QipPUpYmXveAKLJAMBy6iW53osNVBgxfueaTFD_Hp=s224-c-v1-rj'],
+    "short_description": "sint ut sint Cupidatat pork sint sint belly boudin sint boudin",
+    "neighborhood": "Tenderloin",
+    "location": {"lat": 37.7867167, "long": -122.4111737},
+    "price_level": 4,
+    "types": [
+        "night_club",
+        "bar",
+        "lodging",
+        "restaurant",
+        "food",
+        "point_of_interest",
+        "establishment"
+    ]
+  },
+  {name: 'Maven', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj', 'https://lh3.ggpht.com/p/AF1QipNrd_l95_GAu4NjXMo8lvafHxAtvoHLjjXVbfxf=s224-c-v1-rj'],"types": ["restaurant", 'bar']},
+  {name: 'A', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj'],"types": ["restaurant", 'bar']},
+  {name: 'B', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj'],"types": ["restaurant", 'bar']},
+  {name: 'C', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj'],"types": ["restaurant", 'bar']},
+  {name: 'D', photos: ['https://lh3.googleusercontent.com/p/AF1QipNR6KcJVNb3PKTpeli7dIZEOzFqs3ntcWug-U8Q=s1600-w400', 'https://lh3.ggpht.com/p/AF1QipNoMRZwGYU_wB9hp9AQXLlFL5Fx-phGRyX3kAg_=s224-c-v1-rj'],"types": ["restaurant", 'bar']},
 ];
 
 class App extends React.Component{

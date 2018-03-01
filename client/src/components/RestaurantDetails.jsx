@@ -16,11 +16,6 @@ const RestaurantDetails = (props) => {
     return percent + '%';
   }
 
-  // var type = (types) =>{
-  //   console.log(types)
-  //   return types[0];
-  // }
-
   return(
     <div className="restaurant-details">
       <div className="details-title">{restaurant.name}</div>

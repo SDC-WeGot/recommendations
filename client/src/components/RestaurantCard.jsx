@@ -1,5 +1,6 @@
 import React from 'react';
 import RestaurantDetails from './RestaurantDetails.jsx'
+import PhotoCarousel from './PhotoCarousel.jsx'
 
 class RestaurantCard extends React.Component {
   constructor(props){
@@ -7,11 +8,11 @@ class RestaurantCard extends React.Component {
   }
 
   render(){
+    const {restaurant} = this.props;
     return(
       <div className="restaurant-card">
-        <div className="photo-carousel">
-        </div>
-        <RestaurantDetails />
+        <PhotoCarousel photos={restaurant.photos} />
+        <RestaurantDetails restaurant={restaurant} />
 
       </div>
     )

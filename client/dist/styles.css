@@ -1,5 +1,6 @@
 body{
   background-color: #f1f1f2;
+  margin: 0;
 }
 .recommendations-container{
   display: grid;
@@ -7,22 +8,68 @@ body{
   padding-left: 40px;
 }
 .restaurant-card{
-  display: grid;
-  grid-template-columns: 2fr 3fr;
-  height: 228px;
+  display: flex;
+  height: 218px;
   margin-right: 40px;
   margin-bottom: 40px;
   font-family: 'Roboto';
   background-color: #ffffff;
 }
 .photo-carousel{
-  border: solid 1px black;
+  flex: 2;
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  justify-content: center;
+}
+.arrow-left{
+  position: absolute;
+  align-self: flex-start;
+  height: 40px;
+  width: 40px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: white;
+}
+.arrow-left:hover{
+  background: black;
+  cursor: pointer;
+}
+.arrow-left:focus{
+  outline: 0;
+}
+.arrow-right{
+  position: absolute;
+  align-self: flex-end;
+  height: 40px;
+  width: 40px;
+  font-size: 24px;
+  background: none;
+  border: none;
+  border-radius: 50%;
+  color: white;
+}
+.arrow-right:hover{
+  background: black;
+  cursor: pointer;
+}
+.arrow-right:focus{
+  outline: 0;
+}
+.restaurant-photos{
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
 }
 .restaurant-details{
   display: flex;
   flex-direction: column;
   justify-content: center;
-  padding: 20px 24px
+  padding: 20px 24px;
+  flex: 3;
 }
 .details-title{
   letter-spacing: .05em;

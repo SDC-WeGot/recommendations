@@ -9,12 +9,14 @@ class PhotoCarousel extends React.Component {
     }
   }
 
-  nextPhoto(){
+  nextPhoto(e){
+    e.stopPropagation();
     var numPhotos = this.props.photos.length;
     var newIndex = (this.state.photoIndex + 1) % numPhotos;
     this.setState({ photoIndex: newIndex })
   }
-  prevPhoto(){
+  prevPhoto(e){
+    e.stopPropagation();
     var numPhotos = this.props.photos.length;
     var newIndex = (this.state.photoIndex - 1 + numPhotos) % numPhotos;
     this.setState({ photoIndex: newIndex })

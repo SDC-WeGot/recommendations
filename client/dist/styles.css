@@ -14,6 +14,7 @@ body{
   margin-bottom: 40px;
   font-family: 'Roboto';
   background-color: #ffffff;
+  cursor: pointer;
 }
 .photo-carousel{
   flex: 2;

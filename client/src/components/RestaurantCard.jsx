@@ -10,7 +10,7 @@ class RestaurantCard extends React.Component {
   render(){
     const {restaurant} = this.props;
     return(
-      <div className="restaurant-card">
+      <div className="restaurant-card" onClick={this.props.switchRestaurant.bind(this,restaurant.place_id)}>
         <PhotoCarousel photos={restaurant.photos} />
         <RestaurantDetails restaurant={restaurant} />
       </div>
@@ -19,3 +19,5 @@ class RestaurantCard extends React.Component {
 }
 
 export default RestaurantCard;
+
+// <div className="restaurant-card" onClick={(e) => this.props.switchRestaurant(restaurant.place_id,e)}>

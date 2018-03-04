@@ -19,5 +19,3 @@ class RestaurantCard extends React.Component {
 }
 
 export default RestaurantCard;
-
-// <div className="restaurant-card" onClick={(e) => this.props.switchRestaurant(restaurant.place_id,e)}>

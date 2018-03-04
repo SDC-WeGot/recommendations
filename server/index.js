@@ -15,10 +15,9 @@ app.get('/restaurants/:id', function (req, res) {
 });
 
 app.get('/api/restaurants', function (req, res) {
-  // TODO - your code here!
   // This route should return all restaurants
   console.log('GET restaurants');
-  //make call to database
+  // retrieve from database
   restaurants.findAll((err, data)=>{
     if(err){
       res.status(500);
@@ -35,7 +34,24 @@ app.get('/api/restaurants', function (req, res) {
 app.get('/api/restaurants/:id', function (req, res) {
   var placeId = req.params.id || 0;
   console.log("GET " + req.url);
-  restaurants.findOne(placeId, (err, data)=> {
+  // find one restaurant based on id
+  // restaurants.findOne(placeId, (err, data)=> {
+  //   if(err){
+  //     res.status(500);
+  //     console.log(err);
+  //   } else{
+  //     console.log("restaurant info:",data);
+  //     res.status(200);
+  //     res.send(data);
+  //   }
+  // });
+
+  //api call to retrieve nearby places. get top 6 id's returned
+
+  //retrieve data from db
+
+  //find 6 restaurants
+  restaurants.findTop6Restaurants((err, data)=> {
     if(err){
       res.status(500);
       console.log(err);
@@ -45,13 +61,7 @@ app.get('/api/restaurants/:id', function (req, res) {
       res.send(data);
     }
   });
-
-  //api call to nearby places to get the top 6 id's returned
-
-  //retrieve data from db
-
   //send data of 6 restaurants back to client state
-  // res.send('hello');
 
 });
 

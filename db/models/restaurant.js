@@ -41,8 +41,7 @@ function insertOne(restaurant, callback) {
 // retrieves top 10 stories
 function findTop6Restaurants(callback) {
   console.log('find top 6 restaurants!');
-  RestaurantModel.find({}, callback)
-            .limit(6)
+  RestaurantModel.find({}, callback).limit(6);
 }
 
 

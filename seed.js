@@ -1,4 +1,5 @@
 var data = require('./seed_data.js');
+// var data = require('./allData.js');
 var mongoose = require('mongoose');
 var Restaurants = require('./db/models/restaurant.js');
 var api_key = require('./config.js');
@@ -56,7 +57,6 @@ var seedDb = function(data) {
     var photosURLArray = [];
     var photos = result.photos;
     photos.forEach((photo) => {
-      // var photo = photos[0];
       var id = photo.photo_reference;
       getPhotoURLFromGoogle(id, function(url){
         console.log("Photo url from google",url);
@@ -82,7 +82,7 @@ var seedDb = function(data) {
             photos: photosURLArray,
             short_description: result.short_description,
             neighborhood: result.address_components[2]["long_name"],
-            location: { lat: result.geometry.location.lat, long: result.geometry.location.long },
+            location: { lat: result.geometry.location.lat, long: result.geometry.location.lng },
             address: result.formatted_address, 
             website: result.website,
             price_level: result.price_level,

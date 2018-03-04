@@ -26,7 +26,10 @@ function findAll(callback) {
 
 // findOne will retrieve the restaurant associated with the given id
 function findOne(id, callback) {
+  console.log("find " + id);
+  // callback(id);
   RestaurantModel.find({place_id: id}, callback);
+  // RestaurantModel.find({place_id: 'ChIJFUBxSY6AhYARwOaLV7TsLjw'}, callback);
 }
 
 // insertOne inserts a restaurant into the db
@@ -36,15 +39,15 @@ function insertOne(restaurant, callback) {
 }
 
 // retrieves top 10 stories
-function findTop10Restaurant(callback) {
-  console.log('find top 10 restaurants!');
+function findTop6Restaurants(callback) {
+  console.log('find top 6 restaurants!');
   RestaurantModel.find({}, callback)
-            .limit(10)
+            .limit(6)
 }
 
 
 exports.findOne = findOne;
 exports.findAll = findAll;
 exports.insertOne = insertOne;
-exports.findTop10Restaurant = findTop10Restaurant;
+exports.findTop6Restaurants = findTop6Restaurants;
 

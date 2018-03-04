@@ -1,6 +1,7 @@
 import React from 'react';
 import ReactDOM  from 'react-dom';
 import RestaurantCard from './components/RestaurantCard.jsx'
+import $ from 'jquery';
 
 const Restaurants = [
   {
@@ -34,13 +35,74 @@ const Restaurants = [
 class App extends React.Component{
   constructor(props){
     super(props);
+    this.state = {
+      recommended: [],
+    }
+  }
+
+  componentDidMount(){
+    this.getRecommendedRestaurants();
+    // this.fetch();
+  }
+
+  fetch(){
+    console.log('fetching');
+    $.ajax({
+      url: '/api/restaurants/ChIJFUBxSY6AhYARwOaLV7TsLjw',
+      method: 'GET',
+      contentType: 'application/json',
+      success: (data) => {
+        console.log('Get Success:', data);
+        this.setState({
+          recommended: data,
+        },
+        () => console.log('fetched'))
+      },
+      error: (data) => {
+        console.log('Get Error:', data);
+      }
+    });
+
+  }
+
+  getRecommendedRestaurants(){
+    console.log('getting recommended restaurants')
+    // console.log(window.location.href);
+    var id = window.location.href.split('/').pop();
+    console.log(id)
+    // url = url.split('?');
+    // if (url.length > 1) {
+    //   var urlParams = url[1].split('&');
+    //   urlParams = urlParams.reduce((acc, param) => {
+    //     param = param.split('=');
+    //     acc[param[0]] = param[1];
+    //     return acc;
+    //   }, {id: url[0]});
+    // }
+    // console.log(urlParams);
+
+    $.ajax({
+      url: `/api/restaurants/${id}`,
+      method: 'GET',
+      // dataType: 'application/json',
+      success: (data) => {
+        console.log('get success from client!', data);
+        this.setState({
+          recommended: data,
+        },
+        () => console.log('fetched'))
+      },
+      error: (data) => {
+        console.log('get error from client!', data);
+      }
+    })
   }
 
   render(){
-
     return(
       <div className="recommendations-container">
-        {Restaurants.map((restaurant, index) => (
+
+        {this.state.recommended.map((restaurant, index) => (
           <RestaurantCard restaurant={restaurant} key={index} />
         ))}
       </div>

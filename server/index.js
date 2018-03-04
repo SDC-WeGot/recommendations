@@ -35,9 +35,7 @@ app.get('/api/restaurants', function (req, res) {
 
 app.get('/api/restaurants/:id', function (req, res) {
   var placeId = req.params.id || 0;
-  // placeId="ChIJFUBxSY6AhYARwOaLV7TsLjw"
   console.log("GET " + req.url);
-  // find ChIJFUBxSY6AhYARwOaLV7TsLjw in database
   restaurants.findOne(placeId, (err, data)=> {
     if(err){
       res.status(500);
@@ -45,11 +43,9 @@ app.get('/api/restaurants/:id', function (req, res) {
     } else{
       console.log("restaurant info:",data);
       res.status(200);
-      // res.sendFile(path.join(__dirname + '/../client/dist/index.html'));
       res.send(data);
     }
   });
-
 
   //api call to nearby places to get the top 6 id's returned
 
@@ -57,7 +53,7 @@ app.get('/api/restaurants/:id', function (req, res) {
 
   //send data of 6 restaurants back to client state
   // res.send('hello');
-  
+
 });
 
 

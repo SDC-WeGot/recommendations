@@ -8,24 +8,27 @@ class App extends React.Component{
     super(props);
     this.state = {
       recommended: [],
+      restaurant: null
     }
   }
 
   componentDidMount(){
+    this.fetch();
     this.getRecommendedRestaurants();
-    // this.fetch();
   }
 
   fetch(){
     console.log('fetching');
+    var id = window.location.href.split('/')[4];
+    console.log(id);
+
     $.ajax({
-      url: '/api/restaurants',
+      url: `/api/restaurants/${id}`,
       method: 'GET',
-      contentType: 'application/json',
       success: (data) => {
         console.log('Get Success:', data);
         this.setState({
-          recommended: data,
+          restaurant: data,
         },
         () => console.log('fetched'))
       },
@@ -38,11 +41,11 @@ class App extends React.Component{
   getRecommendedRestaurants(){
     console.log('getting recommended restaurants')
     // console.log(window.location.href);
-    var id = window.location.href.split('/').pop();
-    console.log(id)
+    var id = window.location.href.split('/')[4];
+    console.log(id);
 
     $.ajax({
-      url: `/api/restaurants/${id}`,
+      url: `/api/restaurants/recommended/${id}`,
       method: 'GET',
       success: (data) => {
         console.log('get success from client!', data);
@@ -63,12 +66,16 @@ class App extends React.Component{
   }
 
   render(){
-    return(
-      <div className="recommendations-container">
+    {console.log(this.state.restaurant)}
 
-        {this.state.recommended.map((restaurant, index) => (
-          <RestaurantCard restaurant={restaurant} key={index} switchRestaurant={this.goToRestaurant.bind(this)}/>
-        ))}
+    return(
+      <div>
+        <div className="recommendations-title">More Restaurants Near {this.state.restaurant ? this.state.restaurant[0].name : '...'}</div>
+        <div className="recommendations-container">
+          {this.state.recommended.map((restaurant, index) => (
+            <RestaurantCard restaurant={restaurant} key={index} switchRestaurant={this.goToRestaurant.bind(this)}/>
+          ))}
+        </div>
       </div>
     )
   }

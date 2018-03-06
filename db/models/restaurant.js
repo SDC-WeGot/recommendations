@@ -13,7 +13,8 @@ var restaurantSchema = mongoose.Schema({
   address: String, 
   website: String,
   price_level: Number,
-  types: [String]
+  types: [String],
+  nearby: [String]
 });
 
 var RestaurantModel = mongoose.model('Restaurant', restaurantSchema);
@@ -27,7 +28,6 @@ function findAll(callback) {
 // findOne will retrieve the restaurant associated with the given id
 function findOne(id, callback) {
   console.log("find " + id);
-  // callback(id);
   RestaurantModel.find({place_id: id}, callback);
   // RestaurantModel.find({place_id: 'ChIJFUBxSY6AhYARwOaLV7TsLjw'}, callback);
 }
@@ -38,15 +38,14 @@ function insertOne(restaurant, callback) {
   RestaurantModel.create(restaurant, callback);
 }
 
-// retrieves top 10 stories
-function findTop6Restaurants(callback) {
+// retrieve many restaurants
+function findMany(ids, callback) {
   console.log('find top 6 restaurants!');
-  RestaurantModel.find({}, callback).limit(6);
+  RestaurantModel.find({place_id: {$in: ids}}, callback);
 }
 
-
+exports.RestaurantModel = RestaurantModel;
 exports.findOne = findOne;
 exports.findAll = findAll;
 exports.insertOne = insertOne;
-exports.findTop6Restaurants = findTop6Restaurants;
-
+exports.findMany = findMany;

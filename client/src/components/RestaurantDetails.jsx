@@ -18,7 +18,7 @@ const RestaurantDetails = (props) => {
 
   return(
     <div className="restaurant-details">
-      <div className="details-title">{restaurant.name}</div>
+      <div className="details-title"><span className="details-title-text">{restaurant.name}</span></div>
       <div className="details-tags">{restaurant.types[0]} · {restaurant.neighborhood} · {numDollarSign(restaurant.price_level)}</div>
       <div className="details-ratings">
         <img src="/zagat-logo-icon.png" className="zagat-rating-icon"></img><span className="zagat-rating">Food </span><span className="zagat-rating-value">{restaurant.zagat_food_rating}</span><div className="rating-divider"></div>

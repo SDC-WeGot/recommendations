@@ -1,6 +1,13 @@
 body{
   background-color: #f1f1f2;
   margin: 0;
+  font-family: 'Roboto';
+}
+.recommendations-title{
+  font-size: 20px;
+  padding-left: 40px;
+  margin-top: 15px;
+  margin-bottom: 30px;
 }
 .recommendations-container{
   display: grid;
@@ -15,6 +22,12 @@ body{
   font-family: 'Roboto';
   background-color: #ffffff;
   cursor: pointer;
+}
+.restaurant-card:hover .details-title-text{
+  /*color: #b70038;*/
+  /*text-decoration: underline;
+  text-decoration-color: #b70038;*/
+  border-bottom: solid 1px #b70038;
 }
 .photo-carousel{
   flex: 2;

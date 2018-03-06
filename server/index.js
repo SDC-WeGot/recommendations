@@ -73,26 +73,6 @@ app.get('/api/restaurants/recommended/:id', function (req, res) {
       });
     }
   });
-
-
-
-  //api call to retrieve nearby places. get top 6 id's returned
-
-  //retrieve data from db
-
-  //find 6 restaurants
-  // restaurants.findTop6Restaurants((err, data)=> {
-  //   if(err){
-  //     res.status(500);
-  //     console.log(err);
-  //   } else{
-  //     console.log("restaurant info:",data);
-  //     res.status(200);
-  //     res.send(data);
-  //   }
-  // });
-  //send data of 6 restaurants back to client state
-
 });
 
 

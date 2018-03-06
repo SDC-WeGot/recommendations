@@ -17,19 +17,20 @@ const RestaurantDetails = (props) => {
   }
 
   return(
-    <div className="restaurant-details">
-      <div className="details-title"><span className="details-title-text">{restaurant.name}</span></div>
-      <div className="details-tags">{restaurant.types[0]} · {restaurant.neighborhood} · {numDollarSign(restaurant.price_level)}</div>
-      <div className="details-ratings">
-        <img src="/zagat-logo-icon.png" className="zagat-rating-icon"></img><span className="zagat-rating">Food </span><span className="zagat-rating-value">{restaurant.zagat_food_rating}</span><div className="rating-divider"></div>
-        <img src="/google-logo-icon.png" className="google-rating-icon"></img><span className="google-rating-value">{restaurant.google_rating}</span>
-        <div className="google-rating-stars">
-          <div className="star-ratings-top" style={{width : starsPercentage(restaurant.google_rating)}}><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-          <div className="star-ratings-bottom"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+    <div className="restaurant-card-details">
+      <div className="restaurant-card-details-title"><span className="restaurant-card-details-title-text">{restaurant.name}</span></div>
+      <div className="restaurant-card-details-tags">{restaurant.types[0]} · {restaurant.neighborhood} · {numDollarSign(restaurant.price_level)}</div>
+      <div className="restaurant-card-details-ratings">
+        <img src="/WeGot_small_logo_circle.png" className="restaurant-card-details-zagat-rating-icon"></img><span className="restaurant-card-details-zagat-rating">Food </span><span className="restaurant-card-details-zagat-rating-value">{restaurant.zagat_food_rating}</span>
+        <div className="restaurant-card-details-rating-divider"></div>
+        <img src="/google-logo-icon.png" className="restaurant-card-details-google-rating-icon"></img><span className="restaurant-card-details-google-rating-value">{restaurant.google_rating}</span>
+        <div className="restaurant-card-details-google-rating-stars">
+          <div className="restaurant-card-details-star-ratings-top" style={{width : starsPercentage(restaurant.google_rating)}}><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <div className="restaurant-card-details-star-ratings-bottom"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
         </div>
-        <span className="google-rating-count">({restaurant.review_count})</span>
+        <span className="restaurant-card-details-google-rating-count">({restaurant.review_count})</span>
       </div>
-      <div className="details-description">{restaurant.short_description}.</div>
+      <div className="restaurant-card-details-description">{restaurant.short_description}.</div>
     </div>
   )
 }

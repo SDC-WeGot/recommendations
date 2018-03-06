@@ -9,8 +9,11 @@
   },
   "scripts": {
     "server": "nodemon ./server/index.js",
-    "dev-react": "webpack -d --watch",
-    "test": "jest"
+    "react-dev": "webpack -d --watch",
+    "database": "mongod",
+    "seed-database": "node seed.js",
+    "test": "jest",
+    "start": "nodemon ./server/index.js"
   },
   "dependencies": {
     "axios": "^0.18.0",

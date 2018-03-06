@@ -61,3 +61,5 @@ typings/
 client/dist/bundle.js
 client/dist/bundle.js.map
 
+#api key
+config.js

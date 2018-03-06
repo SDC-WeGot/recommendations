@@ -9,10 +9,14 @@
   },
   "scripts": {
     "server": "nodemon ./server/index.js",
-    "dev-react": "webpack -d --watch",
-    "test": "jest"
+    "react-dev": "webpack -d --watch",
+    "database": "mongod",
+    "seed-database": "node seed.js",
+    "test": "jest",
+    "start": "nodemon ./server/index.js"
   },
   "dependencies": {
+    "axios": "^0.18.0",
     "babel-core": "^6.17.0",
     "body-parser": "^1.15.2",
     "express": "^4.14.0",
@@ -20,7 +24,8 @@
     "mongoose": "^4.6.4",
     "react": "^15.6.2",
     "react-dom": "^15.6.2",
-    "request": "^2.75.0"
+    "request": "^2.83.0",
+    "request-promise": "^4.2.2"
   },
   "devDependencies": {
     "babel-jest": "^22.4.1",

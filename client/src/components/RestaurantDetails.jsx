@@ -3,20 +3,34 @@ import React from 'react';
 const RestaurantDetails = (props) => {
   const {restaurant} = props;
 
+  var numDollarSign = (priceLevel) => {
+    var dollarSigns = '';
+    for(var i = 0; i < priceLevel; i++){
+      dollarSigns += '$';
+    }
+    return dollarSigns;
+  }
+
+  var starsPercentage = (googleRating) => {
+    var percent = googleRating / 5 * 100;
+    return percent + '%';
+  }
+
   return(
-    <div className="restaurant-details">
-      <div className="details-title">{restaurant.name}</div>
-      <div className="details-tags">Californian · Lower Haight · $$</div>
-      <div className="details-ratings">
-        <img src="/zagat-logo-icon.png" className="zagat-rating-icon"></img><span className="zagat-rating">Food </span><span className="zagat-rating-value">4.3</span><div className="rating-divider"></div>
-        <img src="/google-logo-icon.png" className="google-rating-icon"></img><span className="google-rating-value">4.3</span>
-        <div className="google-rating-stars">
-          <div className="star-ratings-top" style={{width:'85%'}}><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
-          <div className="star-ratings-bottom"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+    <div className="restaurant-card-details">
+      <div className="restaurant-card-details-title"><span className="restaurant-card-details-title-text">{restaurant.name}</span></div>
+      <div className="restaurant-card-details-tags">{restaurant.types[0]} · {restaurant.neighborhood} · {numDollarSign(restaurant.price_level)}</div>
+      <div className="restaurant-card-details-ratings">
+        <img src="/WeGot_small_logo_circle.png" className="restaurant-card-details-zagat-rating-icon"></img><span className="restaurant-card-details-zagat-rating">Food </span><span className="restaurant-card-details-zagat-rating-value">{restaurant.zagat_food_rating}</span>
+        <div className="restaurant-card-details-rating-divider"></div>
+        <img src="/google-logo-icon.png" className="restaurant-card-details-google-rating-icon"></img><span className="restaurant-card-details-google-rating-value">{restaurant.google_rating}</span>
+        <div className="restaurant-card-details-google-rating-stars">
+          <div className="restaurant-card-details-star-ratings-top" style={{width : starsPercentage(restaurant.google_rating)}}><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
+          <div className="restaurant-card-details-star-ratings-bottom"><span>★</span><span>★</span><span>★</span><span>★</span><span>★</span></div>
         </div>
-        <span className="google-rating-count">(68)</span>
+        <span className="restaurant-card-details-google-rating-count">({restaurant.review_count})</span>
       </div>
-      <div className="details-description">Small plates and creative drinks in a modern setting with wall-mounted plants & polished log.</div>
+      <div className="restaurant-card-details-description">{restaurant.short_description}.</div>
     </div>
   )
 }

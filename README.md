@@ -19,13 +19,25 @@ Takes in a restaurant ID and requests restaurant information from the server. Re
 -webpack
 -MongoDB
 
+### Google API Key
+To seed the database for the application, you will need a Google API key.
+
+You can get an API Key from Google here:
+https://developers.google.com/maps/documentation/javascript/get-api-key
+
+Duplicate config.example.js and rename it to config.js.
+Replace the placeholder strings in your newly created config.js with your Google API key.
+
+NOTE: You've now created the file referenced in seed.js as config.js that your app requires in order to seed the database.
+
 ### Installation
 1. Install dependencies: `npm install`
 2. Start database server: `npm run database`
 3. Seed database: `npm run seed-database`
-4. Start server: `npm start`
+4. Run React Webpack:`npm run react-dev`,
+5. Start server: `npm start`
 
-To start, in your browser navigate to: [http://localhost:3000](http://localhost:3000)
+To start, in your browser navigate to: [http://localhost:3004](http://localhost:3004)
 
 ## Tests
 Run: `npm test`

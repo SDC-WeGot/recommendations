@@ -29,7 +29,7 @@ async function getRestaurants(restData) {
   var response;
   var photosURLArray = [];
 
-  for(var i = 100; i < restData.length; i++){
+  for(var i = 0; i < restData.length; i++){
     var photoRes;
     var rest = restData[i];
     var result = restData[i].result;

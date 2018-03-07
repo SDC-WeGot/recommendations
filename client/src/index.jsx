@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM  from 'react-dom';
 import RestaurantCard from './components/RestaurantCard.jsx'
 import $ from 'jquery';
-import './styles.css';
+import '../dist/styles.css';
 
 class App extends React.Component{
   constructor(props){

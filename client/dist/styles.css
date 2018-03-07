@@ -7,9 +7,9 @@ body{
 }
 .recommendations-title{
   font-size: 20px;
-  padding-left: 40px;
-  margin-top: 15px;
-  margin-bottom: 30px;
+  margin: 0 40px 30px;
+  padding-top: 15px;
+  border-top: 1px #101820 solid;
 }
 .recommendations-container{
   display: grid;

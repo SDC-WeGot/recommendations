@@ -76,4 +76,4 @@ app.get('/api/restaurants/recommended/:id', function (req, res) {
 });
 
 
-app.listen(3000, function () { console.log('WeGot app listening on port 3000!') });
+app.listen(3003, function () { console.log('WeGot app listening on port 3003!') });

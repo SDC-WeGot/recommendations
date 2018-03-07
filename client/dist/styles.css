@@ -1,6 +1,8 @@
 body{
-  background-color: #f1f1f2;
   margin: 0;
+  background-color: #f1f1f2;
+}
+#recommendations-app{
   font-family: 'Roboto';
 }
 .recommendations-title{

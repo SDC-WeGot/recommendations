@@ -11,11 +11,9 @@ mongoose.connect(uri);
 
 app.use(cors());
 app.use(bodyParser.json());
-app.use('/', express.static(path.join(__dirname, '../client/dist')));
 
-app.get('/restaurants/:id', function (req, res) {
-  res.sendFile(path.join(__dirname + '/../client/dist/index.html'));
-});
+app.use('/', express.static(path.join(__dirname, '../client/dist')));
+app.use('/restaurants/:id', express.static(path.join(__dirname, '../client/dist')));
 
 app.get('/api/restaurants', function (req, res) {
   // This route should return all restaurants

@@ -2,12 +2,14 @@ const express = require('express');
 const app = express();
 const bodyParser = require('body-parser');
 const path = require('path');
+const cors = require('cors');
 
 var restaurants = require('../db/models/restaurant.js');
 var mongoose = require('mongoose');
 var uri = 'mongodb://127.0.0.1/wegot'
 mongoose.connect(uri);
 
+app.use(cors());
 app.use(bodyParser.json());
 app.use('/', express.static(path.join(__dirname, '../client/dist')));
 
@@ -76,4 +78,4 @@ app.get('/api/restaurants/recommended/:id', function (req, res) {
 });
 
 
-app.listen(3003, function () { console.log('WeGot app listening on port 3003!') });
+app.listen(3004, function () { console.log('WeGot app listening on port 3004!') });

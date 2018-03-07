@@ -17,8 +17,6 @@ db.once('open', () => {
 
 var googlePhotoURL = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400';
 
-var nearbyRestaurantsURL = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?radius=100&type=restaurant';
-
 //try catch with first request
 //for loop through each response and
   //do another try catch to fetch nearby

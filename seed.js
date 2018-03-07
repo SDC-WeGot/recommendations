@@ -17,12 +17,6 @@ db.once('open', () => {
 
 var googlePhotoURL = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400';
 
-//try catch with first request
-//for loop through each response and
-  //do another try catch to fetch nearby
-  //and second try catch to fetch photo url
-  //then another try catch save to db
-
 async function getRestaurants(restData) {
   var response;
   var photosURLArray = [];

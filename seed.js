@@ -3,10 +3,9 @@ var restData = require('./allData.js');
 var mongoose = require('mongoose');
 var Restaurants = require('./db/models/restaurant.js');
 var api_key = require('./config.js');
-const axios = require('axios');
 const request = require ('request-promise');
 
-var uri = 'mongodb://127.0.0.1/wegot'
+var uri = 'mongodb://127.0.0.1/wegot-recommendations'
 mongoose.connect(uri);
 
 var db = mongoose.connection;

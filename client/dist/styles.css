@@ -87,6 +87,7 @@ body{
 .restaurant-card-details-title{
   letter-spacing: .05em;
   text-transform: uppercase;
+  font-size: 16px;
 }
 .restaurant-card-details-tags{
   color: #656666;

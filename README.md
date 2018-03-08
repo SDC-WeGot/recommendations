@@ -34,7 +34,7 @@ NOTE: You've now created the file referenced in seed.js as config.js that your a
 1. Install dependencies: `npm install`
 2. Start database server: `npm run database`
 3. Seed database: `npm run seed-database`
-4. Run React Webpack:`npm run react-dev`,
+4. Run React Webpack:`npm run react-dev`
 5. Start server: `npm start`
 
 To start, in your browser navigate to: [http://localhost:3004](http://localhost:3004)

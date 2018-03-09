@@ -5,7 +5,7 @@ var Restaurants = require('./db/models/restaurant.js');
 var api_key = require('./config.js');
 const request = require ('request-promise');
 
-var uri = 'mongodb://127.0.0.1/wegot-recommendations'
+var uri = 'mongodb://127.0.0.1/wegot'
 mongoose.connect(uri);
 
 var db = mongoose.connection;

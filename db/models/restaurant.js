@@ -40,8 +40,12 @@ function insertOne(restaurant, callback) {
 
 // retrieve many restaurants
 function findMany(ids, callback) {
-  console.log('find top 6 restaurants!');
+  console.log('find 6 nearby restaurants');
   RestaurantModel.find({place_id: {$in: ids}}, callback);
+}
+
+function count(){
+  return RestaurantModel.count();
 }
 
 exports.RestaurantModel = RestaurantModel;
@@ -49,3 +53,4 @@ exports.findOne = findOne;
 exports.findAll = findAll;
 exports.insertOne = insertOne;
 exports.findMany = findMany;
+exports.count = count;

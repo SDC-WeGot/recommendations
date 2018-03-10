@@ -18,10 +18,9 @@ class App extends React.Component{
   }
 
   getRecommendedRestaurants(){
-    console.log('getting recommended restaurants')
     // console.log(window.location.href);
     var id = window.location.href.split('/')[4];
-    console.log(id);
+    console.log('getting recommended restaurants for id: ' + id)
 
     $.ajax({
       url: `/api/restaurants/${id}/recommendations`,
@@ -31,8 +30,7 @@ class App extends React.Component{
         this.setState({
           restaurant: data[0],
           recommended: data[1]
-        },
-        () => console.log('fetched'))
+        });
       },
       error: (data) => {
         console.log('get error from client!', data);
@@ -46,8 +44,6 @@ class App extends React.Component{
   }
 
   render(){
-    {console.log(this.state.restaurant)}
-
     return(
       <div>
         <div className="recommendations-title">More Restaurants Near {this.state.restaurant ? this.state.restaurant.name : '...'}</div>

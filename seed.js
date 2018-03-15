@@ -1,169 +1,187 @@
-// var restData = require('./seed_data.js');
-var data = require('./allData.js');
-var mongoose = require('mongoose');
-mongoose.Promise = require('bluebird');
-var Restaurants = require('./db/models/restaurant.js');
-var api_key = require('./config.js');
-const request = require ('request-promise');
-const dbAddress = process.env.DB_ADDRESS || 'localhost';
+const faker = require ('faker');
 
-var uri = `mongodb://${dbAddress}/wegot`;
-mongoose.connect(uri, { useMongoClient: true });
+const MongoClient = require('mongodb').MongoClient;
+ 
+// Connection URL
+const dbAddress = process.env.DB_ADDRESS || 'localhost:27017';
+const url = `mongodb://${dbAddress}`;
+// Database Name
+const dbName = 'sagat';
 
-var db = mongoose.connection;
-db.on('error', console.error.bind(console, 'connection error: '));
-db.once('open', () => {
-  console.log('Connected to DB!');
 
-  //seed database if collection count = 0
-  Restaurants.RestaurantModel.count().then( (result) => {
-  // Restaurants.count().then( (result) => {
-    console.log("Count: " + result);
-    if(result === 0){
-      console.log('Collection currently empty.')
-      getRestaurants(data).then(()=> {
-        console.log('goodbye');
-        mongoose.connection.close();
-      });
-    } else {
-      console.log('Collection exists.');
-      db.close();
-    }
+// Use connect method to connect to the server
+MongoClient.connect(url, function(err, client) {
+  console.log("Connected successfully to mongo, inserting entries");
+  const db = client.db(dbName);
+  let insertionCounter = 0;
+  insertIntoDatabase(db, insertionCounter, function() {
+    client.close();
   });
-
 });
 
 
-async function getRestaurants(restData) {
-  console.log('Seeding database...');
+// InsertMany function
+const insertIntoDatabase = function(db, someCounter, callback) {
+  // Get the documents collection
+  const collection = db.collection('restaurants');
+  // Create a batch of restaurants in arrRestaurants
+  let arrRestaurants = restaurantCreator(someCounter, 20000);
+  // Insert prepared arrRestaurants
+  collection.insertMany(arrRestaurants, (err, result) => {
+    if (err) {
+      console.log('Insertion error');
+    }
+    console.log(`Inserted ${arrRestaurants.length} documents`);
+    callback();
+  });
+};
 
-  var response;
+
+let randomIndexGenerator = (max) => {
+  return Math.floor(Math.random() * max);
+};
+
+let randomFloatGenerator = (max) => {
+  let randomFloat = (Math.random() * max);
+  return Math.round(randomFloat * 10) / 10;
+};
+
+const randomNearbyGenerator = (lowerLimit, upperLimit) => {
+  let usedIndices = [];
+  while (usedIndices.length < 6) {
+    let randomIndex = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
+    if (usedIndices.indexOf(randomIndex) === -1) {
+      usedIndices.push(randomIndex);
+    }
+  }
+  return usedIndices;
+};
+
+const randomPictureArr = () => {
+  let dummyPhotos = [
+    'https://images.pexels.com/photos/6267/menu-restaurant-vintage-table.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/262978/pexels-photo-262978.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/67468/pexels-photo-67468.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/696218/pexels-photo-696218.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/5317/food-salad-restaurant-person.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/92090/pexels-photo-92090.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/370984/pexels-photo-370984.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/262918/pexels-photo-262918.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/260922/pexels-photo-260922.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/262047/pexels-photo-262047.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/675951/pexels-photo-675951.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/675951/pexels-photo-675951.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/34650/pexels-photo.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/460537/pexels-photo-460537.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/239975/pexels-photo-239975.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/64208/pexels-photo-64208.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/5938/food-salad-healthy-lunch.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/9315/menu-restaurant-france-eating-9315.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/724216/pexels-photo-724216.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/858508/pexels-photo-858508.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/225448/pexels-photo-225448.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/761854/pexels-photo-761854.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/704982/pexels-photo-704982.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/205961/pexels-photo-205961.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/265903/pexels-photo-265903.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/791810/pexels-photo-791810.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/169391/pexels-photo-169391.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/541216/pexels-photo-541216.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/240223/pexels-photo-240223.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/842546/pexels-photo-842546.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/5249/bread-food-restaurant-people.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/404974/pexels-photo-404974.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/681847/pexels-photo-681847.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/5928/salad-healthy-diet-spinach.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/2232/vegetables-italian-pizza-restaurant.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/159291/beer-machine-alcohol-brewery-159291.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/407293/pexels-photo-407293.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/567633/pexels-photo-567633.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/324030/pexels-photo-324030.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/225228/pexels-photo-225228.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/3498/italian-pizza-restaurant-italy.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/221143/pexels-photo-221143.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/551997/pexels-photo-551997.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/687824/pexels-photo-687824.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/296888/pexels-photo-296888.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/321588/pexels-photo-321588.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/769153/pexels-photo-769153.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/529923/pexels-photo-529923.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/9708/food-pizza-restaurant-eating.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/744780/pexels-photo-744780.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/6216/water-drink-glass-drinking.jpg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/62097/pexels-photo-62097.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/305832/pexels-photo-305832.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/331107/pexels-photo-331107.jpeg?h=350&auto=compress&cs=tinysrgb',
+    'https://images.pexels.com/photos/373290/pexels-photo-373290.jpeg?h=350&auto=compress&cs=tinysrgb',
+  ];
   var photosURLArray = [];
-  var googlePhotoURL = 'https://maps.googleapis.com/maps/api/place/photo?maxwidth=400';
-
-  for(var i = 0; i < restData.length; i++){
-    var photoRes;
-    var rest = restData[i];
-    var result = restData[i].result;
-    // console.log("Number of photos: ", result.photos.length);
-    var photosURLArray = [];
-    var photos = result.photos;
-
-    //loop through photoRef array
-    for(var j = 0; j < photos.length; j++){
-      var photoRefId = photos[j].photo_reference;
-      // console.log(photoRefId);
-      var photoOptions = {
-          url: googlePhotoURL,
-          qs: {
-            'key': api_key.KEY,
-            'photoreference': photoRefId
-          },
-          json: true,
-          headers: {
-            'content-type': 'application/json',
-          },
-      }
-      var photoURL;
-      try {
-        photoRes = await request(photoOptions, (err, res, body) => (
-            photoUrl = res.request.href
-          )
-        )
-      } catch(err){
-        console.log(err);
-      }
-      // console.log(photoUrl);
-      photosURLArray.push(photoUrl);
-
+  let usedPictureIndices = [];
+  while (photosURLArray.length < 10) {
+    let randomIndex = randomIndexGenerator(dummyPhotos.length - 1);
+    if (usedPictureIndices.indexOf(randomIndex) === -1) {
+      photosURLArray.push(dummyPhotos[randomIndex]);
+      usedPictureIndices.push(randomIndex);
     }
-
-    // console.log("number of photos:" + photosURLArray.length);
-
-    //convert types
-    var typesArray = [];
-    var originalTypes = result.types;
-    // console.log(originalTypes.length);
-    originalTypes.forEach((type) => {
-      typesArray.push(convertString(type));
-    });
-
-    //get nearby restaurants
-    var resObj = restData.slice();
-    resObj.sort((r1, r2) => {
-      var d1 = distance(rest, r1);
-      var d2 = distance(rest, r2);
-      // console.log("d1 "+ d1)
-      // console.log("d2 " +d2)
-      if(d1 <= d2){
-        return -1;
-      } else if(d1 > d2){
-        return 1;
-      }
-    });
-    var distArr = resObj.slice(1, 7).map((res) => {
-      return res.result.place_id;
-    })
-    // console.log(distArr);
-
-    //generate restaurant models for each restaurant
-    var restaurant = {
-      name: result.name,
-      place_id: result.place_id,
-      google_rating: result.rating,
-      zagat_food_rating: result.zagat_food,
-      review_count: result.reviews.length,
-      photos: photosURLArray,
-      short_description: result.short_description,
-      neighborhood: result.address_components[2]["long_name"],
-      location: { lat: result.geometry.location.lat, long: result.geometry.location.lng },
-      address: result.formatted_address, 
-      website: result.website,
-      price_level: result.price_level,
-      types: typesArray,
-      nearby: distArr
-    }
-    // console.log(restaurant);
-
-    // add restaurant to db
-    var obj = new Restaurants.RestaurantModel(restaurant);
-    try{
-      await obj.save();
-    } catch(err){
-      console.log(err);
-    }
-    console.log(restaurant.place_id + " saved");
   }
-}
-
-// getRestaurants(restData).then(()=> {
-//   console.log('goodbye');
-//   mongoose.connection.close();
-// });
-
-var convertString = (str) => {
-  var words = str.split('_');
-  for (var i = 0; i < words.length; i++) {
-    words[i] = words[i].charAt(0).toUpperCase() + words[i].slice(1);
-  }
-  return words.join(' ');
+  return photosURLArray;
 };
 
-var distance = (r1, r2) => {
-  var lat1 = r1.result.geometry.location.lat;
-  var lon1 = r1.result.geometry.location.lng;
-  var lat2 = r2.result.geometry.location.lat;
-  var lon2 = r2.result.geometry.location.lng;
-  var radlat1 = Math.PI * lat1/180;
-  var radlat2 = Math.PI * lat2/180;
-  var radlon1 = Math.PI * lon1/180;
-  var radlon2 = Math.PI * lon2/180;
-  var theta = lon1-lon2;
-  var radtheta = Math.PI * theta/180;
-  var dist = Math.sin(radlat1) * Math.sin(radlat2) + Math.cos(radlat1) * Math.cos(radlat2) * Math.cos(radtheta);
-  dist = Math.acos(dist);
-  dist = dist * 180/Math.PI;
-  dist = dist * 60 * 1.1515;
-  return dist;
+
+const restaurantCreator = (seedCounter, batchSize) => {
+  let arrRestaurants = [];
+  let restaurantCreatorCounter = 1;
+  while (restaurantCreatorCounter <= batchSize) {
+    // Select 10 random photos, no repeats
+    let photoArr = randomPictureArr();
+    let randomDescription = faker.company.catchPhrase();
+    let randomPriceLevel = randomIndexGenerator(4);
+    let randomGoogleRating = randomFloatGenerator(5);
+    let randomZagatRating = randomFloatGenerator(5);
+    let randomReviewCount = randomIndexGenerator(1000);
+    let randomNearby = randomNearbyGenerator(seedCounter, seedCounter + batchSize);
+    let randomLongitude = faker.address.longitude();
+    let randomLatitude = faker.address.latitude();
+    let randomCounty = faker.address.county();
+    let randomCompanyName = faker.company.companyName();
+    let rest = {
+      name: randomCompanyName,
+      place_id: (seedCounter + restaurantCreatorCounter),
+      google_rating: randomGoogleRating,
+      zagat_food_rating: randomZagatRating,
+      review_count: randomReviewCount,
+      short_description: randomDescription,
+      neighborhood: randomCounty,
+      price_level: randomPriceLevel,
+      nearby: randomNearby,
+      types:["Restaurant","Food","Point Of Interest","Establishment"],
+      location: {"lat": randomLongitude, "long": randomLatitude},
+      photos: photoArr,
+    };
+    arrRestaurants.push(rest);
+    restaurantCreatorCounter++;
+  }
+  return arrRestaurants;
 };
 
+
+// const indexCollection = function(db, callback) {
+//   db.restaurants.createIndex(
+//     { "place_id": 1 },
+//       {unique: true},
+//       function(err, results) {
+//         console.log(results);
+//         callback();
+//     }
+//   );
+// };
+
+// MongoClient.connect(url)
+//   .then( (err, client) => {
+//     const db = client.db(dbName);
+//     insertionCounter = 0;
+//     seedDatabase(db, insertionCounter, () => {
+  //       client.close();
+  //     });
+  //   })
+  //   .catch((err) => { console.log('Insertion error: ', err)});

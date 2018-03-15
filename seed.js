@@ -134,7 +134,7 @@ const restaurantCreator = (seedCounter, batchSize) => {
   while (restaurantCreatorCounter <= batchSize) {
     // Select 10 random photos, no repeats
     let photoArr = randomPictureArr();
-    let randomDescription = faker.company.catchPhrase();
+    let randomDescription = faker.lorem.sentence();
     let randomPriceLevel = randomIndexGenerator(4);
     let randomGoogleRating = randomFloatGenerator(5);
     let randomZagatRating = randomFloatGenerator(5);

@@ -1,55 +1,117 @@
 const faker = require ('faker');
-
 const MongoClient = require('mongodb').MongoClient;
- 
+// const _ = require('ramda');
+// const cluster = require('cluster');
+// const numCPUs = require('os').cpus().length; // 8
+
+var time = new Date().getTime();
+
 // Connection URL
 const dbAddress = process.env.DB_ADDRESS || 'localhost:27017';
 const url = `mongodb://${dbAddress}`;
 // Database Name
 const dbName = 'sagat';
 
-
 // Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   console.log("Connected successfully to mongo, inserting entries");
   const db = client.db(dbName);
   let insertionCounter = 0;
-  insertIntoDatabase(db, insertionCounter, function() {
-    client.close();
-  });
+  let targetDatabaseSize = 1000000;
+  let batchSize = 2000;
+  let requiredBatches = targetDatabaseSize / batchSize;
+  let batchCounter = 0;
+  while (batchCounter < requiredBatches) {
+    insertIntoDatabase(db, batchCounter, batchSize, targetDatabaseSize, () => {
+      batchCounter++;
+      console.log(`Inserted batch ${batchCounter} in ${(new Date().getTime() - time) / 1000} seconds, ${requiredBatches - batchCounter} batch[es] to go`);
+      if (batchCounter === requiredBatches) {
+        console.log(`Inserted ${batchCounter} batches, of batch size ${batchSize}, in ${(new Date().getTime() - time) / 1000 / 60} minutes; now closing client.`);
+        client.close();
+      }
+    });
+  }
 });
 
+// 4 args- db, roundsCounter, batchSize /*arg2 arg3 to generate place_id*/, totalDatabaseSize/*to generate random nearby*/, callback
+// async function insertIntoDatabase (db, insertionCounter, batchSize, totalDatabaseSize, callback) {
+//   // Get the documents collection
+//   const collection = db.collection('restaurants4');
+//   // Create a batch of restaurants in arrRestaurants
+//   let counterBase = insertionCounter * batchSize;
+//   let arrRestaurants = restaurantCreator(counterBase, batchSize, totalDatabaseSize);
+//   console.log('arrRestaurants.length = ', arrRestaurants.length);
+//   // Prepare array of function calls
+//   let arrInsertOneCalls = arrRestaurants.map(restaurant => {
+//     return {insertOne: {'document': restaurant}};
+//   });
+//   // Insert prepared arrRestaurants
+//   await collection.bulkWrite(arrInsertOneCalls, {ordered: false});
+//   callback();
+// }
 
-// InsertMany function
-const insertIntoDatabase = function(db, someCounter, callback) {
+let insertIntoDatabase = (db, insertionCounter, batchSize, totalDatabaseSize, callback) => {
   // Get the documents collection
-  const collection = db.collection('restaurants');
+  const collection = db.collection('restaurants4');
   // Create a batch of restaurants in arrRestaurants
-  let arrRestaurants = restaurantCreator(someCounter, 20000);
-  // Insert prepared arrRestaurants
-  collection.insertMany(arrRestaurants, (err, result) => {
-    if (err) {
-      console.log('Insertion error');
-    }
-    console.log(`Inserted ${arrRestaurants.length} documents`);
-    callback();
+  var counterBase = insertionCounter * batchSize;
+  var arrRestaurants = restaurantCreator(counterBase, batchSize, totalDatabaseSize);
+  // Prepare array of function calls
+  var arrInsertOneCalls = arrRestaurants.map(restaurant => {
+    return {insertOne: {'document': restaurant}};
   });
+  // Insert prepared arrRestaurants
+  collection.bulkWrite(arrInsertOneCalls, {ordered: false});
+  callback();
 };
 
+const restaurantCreator = (counterBase, batchSize, totalDatabaseSize) => {
+  var arrRestaurants = [];
+  for (var i = 0; i < batchSize; i++) {
+    var uniqueNumber = counterBase + i;
+    var photoArr = randomPictureArr();
+    var randomDescription = faker.lorem.sentence();
+    var randomPriceLevel = randomIndexGenerator(4);
+    var randomGoogleRating = randomFloatGenerator(5);
+    var randomZagatRating = randomFloatGenerator(5);
+    var randomReviewCount = randomIndexGenerator(1000);
+    var randomNearby = randomNearbyGenerator(totalDatabaseSize);
+    var randomLongitude = faker.address.longitude();
+    var randomLatitude = faker.address.latitude();
+    var randomCounty = faker.address.county();
+    var randomCompanyName = faker.company.companyName();
+    var newRestaurant = {
+      name: randomCompanyName,
+      place_id: uniqueNumber,
+      google_rating: randomGoogleRating,
+      zagat_food_rating: randomZagatRating,
+      review_count: randomReviewCount,
+      short_description: randomDescription,
+      neighborhood: randomCounty,
+      price_level: randomPriceLevel,
+      nearby: randomNearby,
+      types:["Restaurant","Food","Point Of Interest","Establishment"],
+      location: {"lat": randomLongitude, "long": randomLatitude},
+      photos: photoArr,
+    };
+    arrRestaurants.push(newRestaurant);
+  }
+  return arrRestaurants;
+};
 
-let randomIndexGenerator = (max) => {
+const randomIndexGenerator = (max) => {
   return Math.floor(Math.random() * max);
 };
 
-let randomFloatGenerator = (max) => {
+const randomFloatGenerator = (max) => {
   let randomFloat = (Math.random() * max);
   return Math.round(randomFloat * 10) / 10;
 };
 
-const randomNearbyGenerator = (lowerLimit, upperLimit) => {
+const randomNearbyGenerator = (max) => {
   let usedIndices = [];
   while (usedIndices.length < 6) {
-    let randomIndex = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
+    let randomIndex = Math.floor(Math.random() * max);
     if (usedIndices.indexOf(randomIndex) === -1) {
       usedIndices.push(randomIndex);
     }
@@ -127,42 +189,6 @@ const randomPictureArr = () => {
   return photosURLArray;
 };
 
-
-const restaurantCreator = (seedCounter, batchSize) => {
-  let arrRestaurants = [];
-  let restaurantCreatorCounter = 1;
-  while (restaurantCreatorCounter <= batchSize) {
-    // Select 10 random photos, no repeats
-    let photoArr = randomPictureArr();
-    let randomDescription = faker.lorem.sentence();
-    let randomPriceLevel = randomIndexGenerator(4);
-    let randomGoogleRating = randomFloatGenerator(5);
-    let randomZagatRating = randomFloatGenerator(5);
-    let randomReviewCount = randomIndexGenerator(1000);
-    let randomNearby = randomNearbyGenerator(seedCounter, seedCounter + batchSize);
-    let randomLongitude = faker.address.longitude();
-    let randomLatitude = faker.address.latitude();
-    let randomCounty = faker.address.county();
-    let randomCompanyName = faker.company.companyName();
-    let rest = {
-      name: randomCompanyName,
-      place_id: (seedCounter + restaurantCreatorCounter),
-      google_rating: randomGoogleRating,
-      zagat_food_rating: randomZagatRating,
-      review_count: randomReviewCount,
-      short_description: randomDescription,
-      neighborhood: randomCounty,
-      price_level: randomPriceLevel,
-      nearby: randomNearby,
-      types:["Restaurant","Food","Point Of Interest","Establishment"],
-      location: {"lat": randomLongitude, "long": randomLatitude},
-      photos: photoArr,
-    };
-    arrRestaurants.push(rest);
-    restaurantCreatorCounter++;
-  }
-  return arrRestaurants;
-};
 
 
 // const indexCollection = function(db, callback) {

@@ -1,10 +1,7 @@
 const faker = require ('faker');
 const MongoClient = require('mongodb').MongoClient;
-// const _ = require('ramda');
-// const cluster = require('cluster');
-// const numCPUs = require('os').cpus().length; // 8
 
-var time = new Date().getTime();
+var startTime = new Date().getTime();
 
 // Connection URL
 const dbAddress = process.env.DB_ADDRESS || 'localhost:27017';
@@ -12,49 +9,33 @@ const url = `mongodb://${dbAddress}`;
 // Database Name
 const dbName = 'sagat';
 
-// Use connect method to connect to the server
 MongoClient.connect(url, function(err, client) {
   console.log("Connected successfully to mongo, inserting entries");
   const db = client.db(dbName);
   let insertionCounter = 0;
-  let targetDatabaseSize = 1000000;
-  let batchSize = 2000;
+  let targetDatabaseSize = 100000;
+  let batchSize = 1000;
   let requiredBatches = targetDatabaseSize / batchSize;
   let batchCounter = 0;
   while (batchCounter < requiredBatches) {
     insertIntoDatabase(db, batchCounter, batchSize, targetDatabaseSize, () => {
       batchCounter++;
-      if (batchCounter % 10 === 0) {
-        console.log(`Inserted batch ${batchCounter} in ${(new Date().getTime() - time) / 1000} seconds, ${requiredBatches - batchCounter} batch[es] to go`);
+      if (batchCounter % 20 === 0) {
+        console.log(`Inserted batch ${batchCounter} in ${(new Date().getTime() - startTime) / 1000} seconds, ${requiredBatches - batchCounter} batch[es] to go`);
       }
       if (batchCounter === requiredBatches) {
-        console.log(`Inserted ${batchCounter} batches, of batch size ${batchSize}, in ${(new Date().getTime() - time) / 1000 / 60} minutes; now closing client.`);
+        console.log(`Inserted ${batchCounter} batches, of batch size ${batchSize}, in ${(new Date().getTime() - startTime) / 1000 / 60} minutes; now creating index.`);
+        db.collection('restaurants').createIndex({place_id: 1});
+        console.log('Index created for place_id; now closing client');
         client.close();
       }
     });
   }
 });
 
-// 4 args- db, roundsCounter, batchSize /*arg2 arg3 to generate place_id*/, totalDatabaseSize/*to generate random nearby*/, callback
-// async function insertIntoDatabase (db, insertionCounter, batchSize, totalDatabaseSize, callback) {
-//   // Get the documents collection
-//   const collection = db.collection('restaurants4');
-//   // Create a batch of restaurants in arrRestaurants
-//   let counterBase = insertionCounter * batchSize;
-//   let arrRestaurants = restaurantCreator(counterBase, batchSize, totalDatabaseSize);
-//   console.log('arrRestaurants.length = ', arrRestaurants.length);
-//   // Prepare array of function calls
-//   let arrInsertOneCalls = arrRestaurants.map(restaurant => {
-//     return {insertOne: {'document': restaurant}};
-//   });
-//   // Insert prepared arrRestaurants
-//   await collection.bulkWrite(arrInsertOneCalls, {ordered: false});
-//   callback();
-// }
-
 let insertIntoDatabase = (db, insertionCounter, batchSize, totalDatabaseSize, callback) => {
   // Get the documents collection
-  const collection = db.collection('restaurants4');
+  const collection = db.collection('restaurants');
   // Create a batch of restaurants in arrRestaurants
   var counterBase = insertionCounter * batchSize;
   var arrRestaurants = restaurantCreator(counterBase, batchSize, totalDatabaseSize);
@@ -69,7 +50,7 @@ let insertIntoDatabase = (db, insertionCounter, batchSize, totalDatabaseSize, ca
 
 const restaurantCreator = (counterBase, batchSize, totalDatabaseSize) => {
   var arrRestaurants = [];
-  for (var i = 0; i < batchSize; i++) {
+  for (var i = 1; i <= batchSize; i++) {
     var uniqueNumber = counterBase + i;
     var photoArr = randomPictureArr();
     var randomDescription = faker.lorem.sentence();
@@ -192,7 +173,6 @@ const randomPictureArr = () => {
 };
 
 
-
 // const indexCollection = function(db, callback) {
 //   db.restaurants.createIndex(
 //     { "place_id": 1 },
@@ -213,3 +193,20 @@ const randomPictureArr = () => {
   //     });
   //   })
   //   .catch((err) => { console.log('Insertion error: ', err)});
+
+// 4 args- db, roundsCounter, batchSize /*arg2 arg3 to generate place_id*/, totalDatabaseSize/*to generate random nearby*/, callback
+// async function insertIntoDatabase (db, insertionCounter, batchSize, totalDatabaseSize, callback) {
+//   // Get the documents collection
+//   const collection = db.collection('restaurants4');
+//   // Create a batch of restaurants in arrRestaurants
+//   let counterBase = insertionCounter * batchSize;
+//   let arrRestaurants = restaurantCreator(counterBase, batchSize, totalDatabaseSize);
+//   console.log('arrRestaurants.length = ', arrRestaurants.length);
+//   // Prepare array of function calls
+//   let arrInsertOneCalls = arrRestaurants.map(restaurant => {
+//     return {insertOne: {'document': restaurant}};
+//   });
+//   // Insert prepared arrRestaurants
+//   await collection.bulkWrite(arrInsertOneCalls, {ordered: false});
+//   callback();
+// }

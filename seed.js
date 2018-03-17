@@ -24,7 +24,9 @@ MongoClient.connect(url, function(err, client) {
   while (batchCounter < requiredBatches) {
     insertIntoDatabase(db, batchCounter, batchSize, targetDatabaseSize, () => {
       batchCounter++;
-      console.log(`Inserted batch ${batchCounter} in ${(new Date().getTime() - time) / 1000} seconds, ${requiredBatches - batchCounter} batch[es] to go`);
+      if (batchCounter % 10 === 0) {
+        console.log(`Inserted batch ${batchCounter} in ${(new Date().getTime() - time) / 1000} seconds, ${requiredBatches - batchCounter} batch[es] to go`);
+      }
       if (batchCounter === requiredBatches) {
         console.log(`Inserted ${batchCounter} batches, of batch size ${batchSize}, in ${(new Date().getTime() - time) / 1000 / 60} minutes; now closing client.`);
         client.close();

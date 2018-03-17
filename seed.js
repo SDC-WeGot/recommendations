@@ -12,7 +12,6 @@ const dbName = 'sagat';
 MongoClient.connect(url, function(err, client) {
   console.log("Connected successfully to mongo, inserting entries");
   const db = client.db(dbName);
-  let insertionCounter = 0;
   let targetDatabaseSize = 100000;
   let batchSize = 1000;
   let requiredBatches = targetDatabaseSize / batchSize;
@@ -171,18 +170,6 @@ const randomPictureArr = () => {
   }
   return photosURLArray;
 };
-
-
-// const indexCollection = function(db, callback) {
-//   db.restaurants.createIndex(
-//     { "place_id": 1 },
-//       {unique: true},
-//       function(err, results) {
-//         console.log(results);
-//         callback();
-//     }
-//   );
-// };
 
 // MongoClient.connect(url)
 //   .then( (err, client) => {

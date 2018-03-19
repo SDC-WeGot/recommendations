@@ -159,7 +159,7 @@ const typeGenerator = () => {
 const restaurantCreator = (counter, batchCounter) => {
   let photoArr = randomPictureArr();
   let randomDescription = faker.lorem.sentence();
-  let randomPriceLevel = randomIndexGenerator(4);
+  let randomPriceLevel = randomIndexGenerator(3) + 1;
   let randomGoogleRating = randomFloatGenerator(5);
   let randomZagatRating = randomFloatGenerator(5);
   let randomReviewCount = randomIndexGenerator(1000);

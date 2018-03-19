@@ -3,8 +3,7 @@ var data = require('./allData.js');
 var mongoose = require('mongoose');
 mongoose.Promise = require('bluebird');
 var Restaurants = require('./db/models/restaurant.js');
-var api_key = require('./config.js');
-const request = require ('request-promise');
+// var api_key = require('./config.js');
 const dbAddress = process.env.DB_ADDRESS || 'localhost';
 
 var uri = `mongodb://${dbAddress}/wegot`;

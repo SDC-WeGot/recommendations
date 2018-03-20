@@ -158,17 +158,24 @@ const restaurantCreator = (uniqueNumber) => {
   return rest;
 };
 
-const randomRecommendedGenerator = (lowerLimit, upperLimit) => {
-  let usedIndices = [];
-  while (usedIndices.length < 6) {
+// Fun to think up and figure out
+const randomRecommendedGenerator = (lowerLimit, upperLimit, partnersIndex) => {
+  let indexCount = 0;
+  // data structure to prevent repeats
+  let indices = {};
+  let indexPairs = [];
+  while (indexCount < 6) {
+    let onePairing = [];
     let randomIndex = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
-    if (usedIndices.indexOf(randomIndex) === -1) {
-      usedIndices.push(randomIndex);
+    if (indices[randomIndex] !== true) {
+      indices[randomIndex] = true;
+      indexCount++;
+      onePairing.push(partnersIndex, randomIndex);
+      indexPairs.push(onePairing);
     }
   }
-  return usedIndices;
+  return indexPairs;
 };
-
 
 function getNextDataRestaurant(t, pageIndex) {
   let data = null;
@@ -179,17 +186,22 @@ function getNextDataRestaurant(t, pageIndex) {
       data.push(restaurantCreator(idx));
     }
   }
+  // console.log('restaurant data.length` = ', data.length);
   return Promise.resolve(data);
 }
 
 function getNextDataNearby(t, pageIndex) {
   let data = null;
   if (pageIndex < batchesNeeded) {
+    console.log('pageIndex = ', pageIndex);
+    console.log('batchesNeeded = ', batchesNeeded);
     data = [];
-    for (let i = 0; i < batchSize; i++) {
-      data.push(randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize));
+    for (let j = 1; j <= batchSize; j++) {
+      let recommended = randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize, j);
+      Array.prototype.push.apply(data, recommended);
     }
   }
+  console.log('getNextDataNearby data.length = ', data.length);
   return Promise.resolve(data);
 }
 
@@ -197,10 +209,11 @@ db
   .tx('massive-insert', t => {
     return t.sequence(batchCounter => {
       return getNextDataRestaurant(t, batchCounter).then(data => {
-          if (data) {
-            const insert = pgp.helpers.insert(data, csRestaurant);
-            return t.none(insert);
-          }
+        if (data) {
+          console.log('restaurant data.length = ', data.length);
+          const insert = pgp.helpers.insert(data, csRestaurant);
+          return t.none(insert);
+        }
         });
       });
     })
@@ -213,19 +226,37 @@ db
     console.log(error);
   });
 
-
-
-/* // Basic structure for single batch
-const insert = pgp.helpers.insert(data, cs);
-// => INSERT INTO "products"("title","price","units")
-  VALUES('red apples',2.35,1000),('large oranges',4.5,1)
-
-
 db
-  .none(insert)
-  .then(() => {
-    // success, all records inserted
+  .tx('massive-insert', t => {
+    return t.sequence(batchCounter => {
+      return getNextDataNearby(t, batchCounter).then(data => {
+        if (data) {
+          console.log('nearby data.length = ', data.length)
+          console.log('data = ', data);
+          const insert = pgp.helpers.insert(data, csNearby);
+          return t.none(insert);
+        }
+      });
+    });
+  })
+  .then(data => {
+    console.log('Total batches:', data.total, ', Duration:', data.duration);
   })
   .catch(error => {
-    // error
-  }); */
+    console.log(error);
+  });
+
+// Faulty mental model from mongo- an array of 1000 arrays of 6 numbers rather than one array of 6000 numbers
+// function getNextDataNearby(t, pageIndex) {
+//   let data = null;
+//   if (pageIndex < batchesNeeded) {
+//     console.log('pageIndex = ', pageIndex);
+//     console.log('batchesNeeded = ', batchesNeeded);
+//     data = [];
+//     for (let j = 0; j < batchSize; j++) {
+//       data.push(randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize));
+//     }
+//   }
+//   console.log('getNextDataNearby data.length = ', data.length)
+//   return Promise.resolve(data);
+// }

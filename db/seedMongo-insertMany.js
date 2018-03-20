@@ -154,7 +154,7 @@ const randomPictureArr = () => {
 const typeGenerator = () => {
   let types = ['Restaurant', 'Bar', 'Night Club', 'Brasserie', 'Cafe', 'Bakery'];
   return types[randomIndexGenerator(types.length)];
-}
+};
 
 const restaurantCreator = (counter, batchCounter) => {
   let photoArr = randomPictureArr();

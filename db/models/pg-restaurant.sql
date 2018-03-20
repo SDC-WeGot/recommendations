@@ -3,7 +3,7 @@ DROP TABLE IF EXISTS restaurants;
 
 CREATE TABLE restaurants (
   id SERIAL PRIMARY KEY,
-  name TEXT NOT NULL,
+  business_name TEXT NOT NULL,
   place_id INTEGER UNIQUE NOT NULL,
   google_rating REAL NOT NULL,
   zagat_food_rating REAL NOT NULL,
@@ -11,8 +11,8 @@ CREATE TABLE restaurants (
   short_description TEXT NOT NULL,
   neighborhood TEXT NOT NULL,
   price_level SMALLINT NOT NULL,
-  type TEXT NOT NULL,
-  location JSONB NOT NULL,
+  business_type TEXT NOT NULL,
+  business_location JSONB NOT NULL,
   photos TEXT[] NOT NULL
 );
 
@@ -22,4 +22,4 @@ CREATE TABLE nearby (
 );
 
 -- terminal command to run the sql file
--- psql -f pg-resetaurant.sql sagat-sql
+-- psql -f pg-restaurant.sql sagat-sql

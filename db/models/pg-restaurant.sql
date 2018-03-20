@@ -1,5 +1,5 @@
-DROP TABLE IF EXISTS restaurants;
 DROP TABLE IF EXISTS nearby;
+DROP TABLE IF EXISTS restaurants;
 
 CREATE TABLE restaurants (
   id SERIAL PRIMARY KEY,
@@ -13,7 +13,7 @@ CREATE TABLE restaurants (
   price_level SMALLINT NOT NULL,
   type TEXT NOT NULL,
   location JSONB NOT NULL,
-  photos ARRAY NOT NULL
+  photos TEXT[] NOT NULL
 );
 
 CREATE TABLE nearby (

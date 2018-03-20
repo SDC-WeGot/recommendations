@@ -22,7 +22,7 @@ const db = pgp('postgres://localhost:5432/sagat-sql'); // your database object
 // Creating a reusable/static ColumnSet for generating INSERT queries:
 const csRestaurant = new pgp.helpers.ColumnSet(
   [
-    'name',
+    'business_name',
     'place_id',
     'google_rating',
     'zagat_food_rating',
@@ -30,8 +30,8 @@ const csRestaurant = new pgp.helpers.ColumnSet(
     'short_description',
     'neighborhood',
     'price_level',
-    'type',
-    'location',
+    'business_type',
+    'business_location',
     'photos',
   ],
   {table: 'restaurants'}
@@ -143,7 +143,7 @@ const restaurantCreator = (uniqueNumber) => {
   let randomCompanyName = faker.company.companyName();
   let randomType = typeGenerator();
   let rest = {
-    name: randomCompanyName,
+    business_name: randomCompanyName,
     place_id: uniqueNumber,
     google_rating: randomGoogleRating,
     zagat_food_rating: randomZagatRating,
@@ -151,8 +151,8 @@ const restaurantCreator = (uniqueNumber) => {
     short_description: randomDescription,
     neighborhood: randomCounty,
     price_level: randomPriceLevel,
-    type: randomType,
-    location: {"lat": randomLongitude, "long": randomLatitude},
+    business_type: randomType,
+    business_location: {"lat": randomLongitude, "long": randomLatitude},
     photos: photoArr,
   };
   return rest;
@@ -165,12 +165,13 @@ const randomRecommendedGenerator = (lowerLimit, upperLimit, partnersIndex) => {
   let indices = {};
   let indexPairs = [];
   while (indexCount < 6) {
-    let onePairing = [];
-    let randomIndex = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
-    if (indices[randomIndex] !== true) {
-      indices[randomIndex] = true;
+    let onePairing = {};
+    let randomIndexInBatch = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
+    if (indices[randomIndexInBatch] !== true) {
+      indices[randomIndexInBatch] = true;
       indexCount++;
-      onePairing.push(partnersIndex, randomIndex);
+      onePairing.place_id = partnersIndex;
+      onePairing.recommended = randomIndexInBatch
       indexPairs.push(onePairing);
     }
   }
@@ -186,65 +187,70 @@ function getNextDataRestaurant(t, pageIndex) {
       data.push(restaurantCreator(idx));
     }
   }
-  // console.log('restaurant data.length` = ', data.length);
   return Promise.resolve(data);
 }
 
 function getNextDataNearby(t, pageIndex) {
   let data = null;
   if (pageIndex < batchesNeeded) {
-    console.log('pageIndex = ', pageIndex);
-    console.log('batchesNeeded = ', batchesNeeded);
     data = [];
     for (let j = 1; j <= batchSize; j++) {
-      let recommended = randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize, j);
+      const recommended = randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize, j);
       Array.prototype.push.apply(data, recommended);
     }
   }
-  console.log('getNextDataNearby data.length = ', data.length);
   return Promise.resolve(data);
 }
 
-db
-  .tx('massive-insert', t => {
-    return t.sequence(batchCounter => {
-      return getNextDataRestaurant(t, batchCounter).then(data => {
-        if (data) {
-          console.log('restaurant data.length = ', data.length);
-          const insert = pgp.helpers.insert(data, csRestaurant);
-          return t.none(insert);
+async function seedTwoTables() {
+  await
+  db
+    .tx('massive-insert', t => {
+      return t.sequence(batchCounter => {
+        if (batchCounter % 20 === 0) {
+          console.log(`Batch ${batchCounter} complete, ${batchesNeeded - batchCounter} left`);
         }
+        return getNextDataRestaurant(t, batchCounter).then(data => {
+          if (data) {
+            const insert = pgp.helpers.insert(data, csRestaurant);
+            return t.none(insert);
+          }
         });
       });
     })
-  .then(data => {
-    // COMMIT has been executed
-    console.log('Total batches:', data.total, ', Duration:', data.duration);
-  })
-  .catch(error => {
-    // ROLLBACK has been executed
-    console.log(error);
-  });
-
-db
-  .tx('massive-insert', t => {
-    return t.sequence(batchCounter => {
-      return getNextDataNearby(t, batchCounter).then(data => {
-        if (data) {
-          console.log('nearby data.length = ', data.length)
-          console.log('data = ', data);
-          const insert = pgp.helpers.insert(data, csNearby);
-          return t.none(insert);
-        }
-      });
+    .then(data => {
+      // COMMIT has been executed
+      console.log('Total batches:', data.total, ', Duration:', data.duration);
+    })
+    .catch(error => {
+      // ROLLBACK has been executed
+      console.log(error);
     });
-  })
-  .then(data => {
-    console.log('Total batches:', data.total, ', Duration:', data.duration);
-  })
-  .catch(error => {
-    console.log(error);
-  });
+  
+  db
+    .tx('massive-insert', t => {
+      return t.sequence(nearbyIndex => {
+        if (batchCounter % 20 === 0) {
+          console.log(`Batch ${batchCounter} complete, ${batchesNeeded - batchCounter} left`);
+        }
+        return getNextDataNearby(t, nearbyIndex).then(data => {
+          if (data) {
+            const insert = pgp.helpers.insert(data, csNearby);
+            return t.none(insert);
+          }
+        });
+      });
+    })
+    .then(data => {
+      console.log('Total batches:', data.total, ', Duration:', data.duration);
+    })
+    .catch(error => {
+      console.log(error);
+    });
+}
+
+seedTwoTables()
+
 
 // Faulty mental model from mongo- an array of 1000 arrays of 6 numbers rather than one array of 6000 numbers
 // function getNextDataNearby(t, pageIndex) {

@@ -13,10 +13,14 @@ const pg = require('pg');
 //   query.on('end', () => { client.end(); });
   
   
-const targetDatabaseSize = 10000;
+const targetDatabaseSize = 10000000;
 const batchSize = 1000;
 const batchesNeeded = targetDatabaseSize / batchSize;
 
+var startTimeTable1 = new Date().getTime();
+var startTimeTable2;
+let endTime1;
+let endTime2;
 
 const db = pgp('postgres://localhost:5432/sagat-sql'); // your database object
 // Creating a reusable/static ColumnSet for generating INSERT queries:
@@ -203,16 +207,18 @@ function getNextDataNearby(t, pageIndex) {
 }
 
 async function seedTwoTables() {
+  let currentCounter = 0;
   await
   db
     .tx('massive-insert', t => {
       return t.sequence(batchCounter => {
-        if (batchCounter % 20 === 0) {
-          console.log(`Batch ${batchCounter} complete, ${batchesNeeded - batchCounter} left`);
-        }
         return getNextDataRestaurant(t, batchCounter).then(data => {
           if (data) {
+            currentCounter++;
             const insert = pgp.helpers.insert(data, csRestaurant);
+            if (currentCounter % 20 === 0) {
+              console.log(`Now inserting batch ${currentCounter}, in ${(new Date().getTime() - startTimeTable1) / 1000 / 60} mins, ${batchesNeeded - currentCounter} left in table 1`);
+            }
             return t.none(insert);
           }
         });
@@ -220,29 +226,39 @@ async function seedTwoTables() {
     })
     .then(data => {
       // COMMIT has been executed
+      endTime1 = new Date().getTime();
       console.log('Total batches:', data.total, ', Duration:', data.duration);
+      console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into table 1, in ${(endTime1 - startTimeTable1) / 1000 / 60} min`);
+      startTimeTable2 = new Date().getTime();
     })
     .catch(error => {
       // ROLLBACK has been executed
       console.log(error);
     });
   
+  currentCounter = 0;
+  
   db
     .tx('massive-insert', t => {
       return t.sequence(nearbyIndex => {
-        if (batchCounter % 20 === 0) {
-          console.log(`Batch ${batchCounter} complete, ${batchesNeeded - batchCounter} left`);
-        }
         return getNextDataNearby(t, nearbyIndex).then(data => {
           if (data) {
+            currentCounter++;
             const insert = pgp.helpers.insert(data, csNearby);
+            if (currentCounter % 20 === 0) {
+              console.log(`Now inserting batch ${data.total}, in ${(new Date().getTime() - startTimeTable2) / 1000 / 60} mins, ${batchesNeeded - currentCounter} left in table 2`);
+            }
             return t.none(insert);
           }
         });
       });
     })
     .then(data => {
+      endTime2 = new Date().getTime();
       console.log('Total batches:', data.total, ', Duration:', data.duration);
+      console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into table 1, in ${(endTime1 - startTimeTable1) / 1000 / 60} mins`);
+      console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into table 2, in ${(endTime2 - startTimeTable2) / 1000 / 60} mins`);
+      console.log(`Total time: ${(new Date().getTime() - startTimeTable2) / 1000 / 60}`);
     })
     .catch(error => {
       console.log(error);

@@ -5,7 +5,7 @@ const faker = require('faker');
 const pg = require('pg');
 
 // // Table creation script. We'll create a table by running the schema file instead.
-// const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/sagat-sql';
+// const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/sagat_sql';
 // const client = new pg.Client(connectionString);
 // client.connect();
 // const query = client.query(
@@ -13,7 +13,7 @@ const pg = require('pg');
 //   query.on('end', () => { client.end(); });
   
   
-const targetDatabaseSize = 10000000;
+const targetDatabaseSize = 10000;
 const batchSize = 1000;
 const batchesNeeded = targetDatabaseSize / batchSize;
 
@@ -22,12 +22,11 @@ var startTimeTable2;
 let endTime1;
 let endTime2;
 
-const db = pgp('postgres://localhost:5432/sagat-sql'); // your database object
+const db = pgp('postgres://localhost:5432/sagat_sql'); // your database object
 // Creating a reusable/static ColumnSet for generating INSERT queries:
 const csRestaurant = new pgp.helpers.ColumnSet(
   [
     'business_name',
-    'place_id',
     'google_rating',
     'zagat_food_rating',
     'review_count',
@@ -35,7 +34,8 @@ const csRestaurant = new pgp.helpers.ColumnSet(
     'neighborhood',
     'price_level',
     'business_type',
-    'business_location',
+    'longitude',
+    'latitude',
     'photos',
   ],
   {table: 'restaurants'}
@@ -118,12 +118,13 @@ const randomPictureArr = () => {
     'https://images.pexels.com/photos/373290/pexels-photo-373290.jpeg?h=350&auto=compress&cs=tinysrgb',
   ];
   var photosURLArray = [];
-  let usedPictureIndices = [];
+  // let usedPictureIndices = [];
+  let usedPictureIndices = {};
   while (photosURLArray.length < 10) {
     let randomIndex = randomIndexGenerator(dummyPhotos.length - 1);
-    if (usedPictureIndices.indexOf(randomIndex) === -1) {
+    if (usedPictureIndices[randomIndex] !== true) {
       photosURLArray.push(dummyPhotos[randomIndex]);
-      usedPictureIndices.push(randomIndex);
+      usedPictureIndices[randomIndex] = true;
     }
   }
   return photosURLArray;
@@ -148,7 +149,6 @@ const restaurantCreator = (uniqueNumber) => {
   let randomType = typeGenerator();
   let rest = {
     business_name: randomCompanyName,
-    place_id: uniqueNumber,
     google_rating: randomGoogleRating,
     zagat_food_rating: randomZagatRating,
     review_count: randomReviewCount,
@@ -156,26 +156,28 @@ const restaurantCreator = (uniqueNumber) => {
     neighborhood: randomCounty,
     price_level: randomPriceLevel,
     business_type: randomType,
-    business_location: {"lat": randomLongitude, "long": randomLatitude},
+    longitude: randomLongitude,
+    latitude: randomLatitude,
+    // Don't need 10
     photos: photoArr,
   };
   return rest;
 };
 
 // Fun to think up and figure out
-const randomRecommendedGenerator = (lowerLimit, upperLimit, partnersIndex) => {
+const randomRecommendedGenerator = (partnersIndex) => {
   let indexCount = 0;
   // data structure to prevent repeats
   let indices = {};
   let indexPairs = [];
   while (indexCount < 6) {
     let onePairing = {};
-    let randomIndexInBatch = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
+    let randomIndexInBatch = Math.floor(Math.random() * targetDatabaseSize + 1);
     if (indices[randomIndexInBatch] !== true) {
       indices[randomIndexInBatch] = true;
       indexCount++;
       onePairing.place_id = partnersIndex;
-      onePairing.recommended = randomIndexInBatch
+      onePairing.recommended = randomIndexInBatch;
       indexPairs.push(onePairing);
     }
   }
@@ -187,8 +189,7 @@ function getNextDataRestaurant(t, pageIndex) {
   if (pageIndex < batchesNeeded) {
     data = [];
     for (let i = 1; i <= batchSize; i++) {
-      const idx = pageIndex * batchSize + i; // to insert unique place_id
-      data.push(restaurantCreator(idx));
+      data.push(restaurantCreator());
     }
   }
   return Promise.resolve(data);
@@ -199,7 +200,7 @@ function getNextDataNearby(t, pageIndex) {
   if (pageIndex < batchesNeeded) {
     data = [];
     for (let j = 1; j <= batchSize; j++) {
-      const recommended = randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize, j);
+      const recommended = randomRecommendedGenerator(j);
       Array.prototype.push.apply(data, recommended);
     }
   }
@@ -207,6 +208,7 @@ function getNextDataNearby(t, pageIndex) {
 }
 
 async function seedTwoTables() {
+  // Think about removing
   let currentCounter = 0;
   await
   db
@@ -214,9 +216,10 @@ async function seedTwoTables() {
       return t.sequence(batchCounter => {
         return getNextDataRestaurant(t, batchCounter).then(data => {
           if (data) {
+            console.log('data.length = ', data.length);
             currentCounter++;
             const insert = pgp.helpers.insert(data, csRestaurant);
-            if (currentCounter % 20 === 0) {
+            if (currentCounter % 100 === 0) {
               console.log(`Now inserting batch ${currentCounter}, in ${(new Date().getTime() - startTimeTable1) / 1000 / 60} mins, ${batchesNeeded - currentCounter} left in table 1`);
             }
             return t.none(insert);
@@ -237,15 +240,16 @@ async function seedTwoTables() {
     });
   
   currentCounter = 0;
-  
   db
     .tx('massive-insert', t => {
       return t.sequence(nearbyIndex => {
         return getNextDataNearby(t, nearbyIndex).then(data => {
+          // PROBLEM HERE
           if (data) {
+            console.log('data.length = ', data.length);
             currentCounter++;
             const insert = pgp.helpers.insert(data, csNearby);
-            if (currentCounter % 20 === 0) {
+            if (currentCounter % 100 === 0) {
               console.log(`Now inserting batch ${data.total}, in ${(new Date().getTime() - startTimeTable2) / 1000 / 60} mins, ${batchesNeeded - currentCounter} left in table 2`);
             }
             return t.none(insert);

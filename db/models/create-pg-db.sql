@@ -1,0 +1,1 @@
+CREATE DATABASE sagat_sql2;

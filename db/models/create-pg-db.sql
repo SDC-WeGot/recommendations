@@ -1,1 +1,1 @@
-CREATE DATABASE sagat_sql2;
+CREATE DATABASE sagat_sql;

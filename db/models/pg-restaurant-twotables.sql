@@ -23,4 +23,4 @@ CREATE TABLE nearby (
 );
 
 -- terminal command to run the sql file, naming which database to do the work in
--- psql -f pg-restaurant.sql sagat_nofk
+-- psql -f pg-restaurant-twotables.sql sagat_twotables

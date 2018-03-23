@@ -1,5 +1,3 @@
-CREATE DATABASE sagat_sql;
-
 DROP TABLE IF EXISTS nearby;
 DROP TABLE IF EXISTS restaurants;
 
@@ -20,8 +18,8 @@ CREATE TABLE restaurants (
 );
 
 CREATE TABLE nearby (
-  place_id INTEGER NOT NULL REFERENCES restaurants (place_id),
-  recommended INTEGER NOT NULL REFERENCES restaurants (place_id)
+  place_id INTEGER NOT NULL,
+  recommended INTEGER NOT NULL
 );
 
 -- terminal command to run the sql file, naming which database to do the work in

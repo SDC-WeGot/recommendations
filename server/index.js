@@ -18,6 +18,7 @@ app.use('/', express.static(path.join(__dirname, '../client/dist')));
 app.use('/restaurants/:id', express.static(path.join(__dirname, '../client/dist')));
 
 app.get('/api/restaurants/:id/recommendations', function (req, res) {
+  // change default to 1?
   var placeId = req.params.id || 0;
   console.log("GET " + req.url);
   // find recommended restaurants based on id
@@ -28,6 +29,7 @@ app.get('/api/restaurants/:id/recommendations', function (req, res) {
       console.log(err);
     } else{
       // console.log("restaurant info:",data);
+      // console.log("data: ",data);
       var nearbyArr = data[0].nearby;
       // console.log(nearbyArr);
       results.push(data[0]);

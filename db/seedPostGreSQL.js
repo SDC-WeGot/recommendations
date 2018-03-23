@@ -1,8 +1,8 @@
+const pg = require('pg');
 const pgp = require('pg-promise')({
   capSQL: true, // generate capitalized SQL
 });
 const faker = require('faker');
-const pg = require('pg');
 
 // // Table creation script. We'll create a table by running the schema file instead.
 // const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/sagat_sql';
@@ -13,16 +13,25 @@ const pg = require('pg');
 //   query.on('end', () => { client.end(); });
   
   
-const targetDatabaseSize = 10000;
-const batchSize = 1000;
+// const targetDatabaseSize = 8790000;
+const targetDatabaseSize = 100000;
+let batchSize = 1000;
 const batchesNeeded = targetDatabaseSize / batchSize;
+let restaurantJobsLeft = targetDatabaseSize;
+let nearbyJobsLeft = targetDatabaseSize;
 
-var startTimeTable1 = new Date().getTime();
-var startTimeTable2;
-let endTime1;
-let endTime2;
+var startTimeRestaurant = new Date().getTime();
+var startTimeNearby = new Date().getTime();
+let endTimeRestaurant;
+let endTimeNearby;
 
 const db = pgp('postgres://localhost:5432/sagat_sql'); // your database object
+const dbt = pgp({
+  database: 'sagat_sql',
+  port: 5432,
+});
+
+
 // Creating a reusable/static ColumnSet for generating INSERT queries:
 const csRestaurant = new pgp.helpers.ColumnSet(
   [
@@ -187,6 +196,9 @@ const randomRecommendedGenerator = (partnersIndex) => {
 function getNextDataRestaurant(t, pageIndex) {
   let data = null;
   if (pageIndex < batchesNeeded) {
+    if (restaurantJobsLeft < batchSize) {
+      batchSize = restaurantJobsLeft;
+    }
     data = [];
     for (let i = 1; i <= batchSize; i++) {
       data.push(restaurantCreator());
@@ -198,6 +210,9 @@ function getNextDataRestaurant(t, pageIndex) {
 function getNextDataNearby(t, pageIndex) {
   let data = null;
   if (pageIndex < batchesNeeded) {
+    if (nearbyJobsLeft < batchSize) {
+      batchSize = nearbyJobsLeft;
+    }
     data = [];
     for (let j = 1; j <= batchSize; j++) {
       const recommended = randomRecommendedGenerator(j);
@@ -207,20 +222,49 @@ function getNextDataNearby(t, pageIndex) {
   return Promise.resolve(data);
 }
 
+function createForeignKeys() {
+  return dbt.none('ALTER TABLE nearby ADD CONSTRAINT place_id FOREIGN KEY (place_id) REFERENCES restaurants; ALTER TABLE nearby ADD CONSTRAINT fk FOREIGN KEY (place_id) REFERENCES restaurants (place_id);');
+}
+
 async function seedTwoTables() {
-  // Think about removing
-  let currentCounter = 0;
+  nearbyCounter = 0;
+  db
+  .tx('massive-insert', t => {
+    return t.sequence(nearbyIndex => {
+      return getNextDataNearby(t, nearbyIndex).then(data => {
+        // PROBLEM HERE
+        if (data) {
+          nearbyJobsLeft = nearbyJobsLeft - batchSize;
+          nearbyCounter++;
+          const insert = pgp.helpers.insert(data, csNearby);
+          if (nearbyCounter % 20 === 0) {
+            console.log(`Inserted ${nearbyCounter} batches in ${(new Date().getTime() - startTimeNearby) / 1000 / 60} mins, ${batchesNeeded - nearbyCounter} left in TABLE nearby`);
+          }
+          return t.none(insert);
+        }
+      });
+    });
+  })
+  .then(data => {
+    endTimeNearby = new Date().getTime();
+    // console.log('Total batches:', data.total, ', Duration:', data.duration);
+  })
+  .catch(error => {
+    console.log(error);
+  });
+
+  let restaurantCounter = 0;
   await
   db
     .tx('massive-insert', t => {
       return t.sequence(batchCounter => {
         return getNextDataRestaurant(t, batchCounter).then(data => {
           if (data) {
-            console.log('data.length = ', data.length);
-            currentCounter++;
+            restaurantJobsLeft = restaurantJobsLeft - batchSize;
+            restaurantCounter++;
             const insert = pgp.helpers.insert(data, csRestaurant);
-            if (currentCounter % 100 === 0) {
-              console.log(`Now inserting batch ${currentCounter}, in ${(new Date().getTime() - startTimeTable1) / 1000 / 60} mins, ${batchesNeeded - currentCounter} left in table 1`);
+            if (restaurantCounter % 20 === 0) {
+              console.log(`Inserted ${restaurantCounter} batches in ${(new Date().getTime() - startTimeRestaurant) / 1000 / 60} mins, ${batchesNeeded - restaurantCounter} left in TABLE restaurants`);
             }
             return t.none(insert);
           }
@@ -229,44 +273,20 @@ async function seedTwoTables() {
     })
     .then(data => {
       // COMMIT has been executed
-      endTime1 = new Date().getTime();
-      console.log('Total batches:', data.total, ', Duration:', data.duration);
-      console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into table 1, in ${(endTime1 - startTimeTable1) / 1000 / 60} min`);
-      startTimeTable2 = new Date().getTime();
+      endTimeRestaurant = new Date().getTime();
+      // console.log('Total batches:', data.total, ', Duration:', data.duration); /* data.duration is in ms */
+      // console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into TABLE restaurants, in ${(endTimeRestaurant - startTimeRestaurant) / 1000 / 60} min`);
     })
     .catch(error => {
       // ROLLBACK has been executed
       console.log(error);
     });
-  
-  currentCounter = 0;
-  db
-    .tx('massive-insert', t => {
-      return t.sequence(nearbyIndex => {
-        return getNextDataNearby(t, nearbyIndex).then(data => {
-          // PROBLEM HERE
-          if (data) {
-            console.log('data.length = ', data.length);
-            currentCounter++;
-            const insert = pgp.helpers.insert(data, csNearby);
-            if (currentCounter % 100 === 0) {
-              console.log(`Now inserting batch ${data.total}, in ${(new Date().getTime() - startTimeTable2) / 1000 / 60} mins, ${batchesNeeded - currentCounter} left in table 2`);
-            }
-            return t.none(insert);
-          }
-        });
-      });
-    })
-    .then(data => {
-      endTime2 = new Date().getTime();
-      console.log('Total batches:', data.total, ', Duration:', data.duration);
-      console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into table 1, in ${(endTime1 - startTimeTable1) / 1000 / 60} mins`);
-      console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into table 2, in ${(endTime2 - startTimeTable2) / 1000 / 60} mins`);
-      console.log(`Total time: ${(new Date().getTime() - startTimeTable2) / 1000 / 60}`);
-    })
-    .catch(error => {
-      console.log(error);
-    });
+
+    console.log(`Inserted ${batchesNeeded} batches, of batch size ${batchSize} into TABLE restaurants, in ${(endTimeRestaurant - startTimeRestaurant) / 1000 / 60} min`);
+    console.log(`Inserted ${batchesNeeded} batches, of batch size ${batchSize} into TABLE nearby, in ${(endTimeNearby - startTimeNearby) / 1000 / 60} mins`);
+    console.log('Creating foreign keys');
+    await createForeignKeys();
+    console.log(`Total time: ${(new Date().getTime() - startTimeRestaurant) / 1000 / 60}`);
 }
 
 seedTwoTables()

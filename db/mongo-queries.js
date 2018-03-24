@@ -30,7 +30,7 @@ const dbName = 'sagat';
 //   });
 // };
 
-let findOne = (id, callback) => {
+let findNearby = (id, callback) => {
   MongoClient.connect(url, function(err, client) {
     // console.log("Connected successfully to mongo, finding entry");
     const db = client.db(dbName);
@@ -76,12 +76,17 @@ let findOne = (id, callback) => {
 //   });
 // };
 
+let randomIndexGenerator = (max) => {
+  return Math.floor(Math.random() * max);
+};
+
 
 var startTime = new Date().getTime();
 
 let queryThousandTimes = (callback) => {
   for (var i = 0; i < 1000; i++) {
-    findOne(1, (data) => {
+    let randomIndex = randomIndexGenerator(10000000);
+    findNearby(randomIndex, (data) => {
       // console.log(`data = ${JSON.stringify(data)}`);
     });
     if (i === 999) {
@@ -92,4 +97,4 @@ let queryThousandTimes = (callback) => {
 }
 
 queryThousandTimes();
-// 563, 467, 464, 511, 458
+// 563, 467, 464, 511, 458, 448, 464

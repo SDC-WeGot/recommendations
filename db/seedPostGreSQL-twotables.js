@@ -209,13 +209,16 @@ function getNextDataRestaurant(t, pageIndex) {
 
 function getNextDataNearby(t, pageIndex) {
   let data = null;
+  let loopSize;
   if (pageIndex < batchesNeeded) {
     if (nearbyJobsLeft < batchSize) {
-      batchSize = nearbyJobsLeft;
+      loopSize = nearbyJobsLeft;
+    } else {
+      loopSize = batchSize
     }
     data = [];
-    for (let j = 1; j <= batchSize; j++) {
-      const recommended = randomRecommendedGenerator(j);
+    for (let j = 1; j <= loopSize; j++) {
+      const recommended = randomRecommendedGenerator(pageIndex * batchSize + j);
       Array.prototype.push.apply(data, recommended);
     }
   }

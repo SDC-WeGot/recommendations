@@ -225,8 +225,12 @@ function getNextDataNearby(t, pageIndex) {
   return Promise.resolve(data);
 }
 
-function createForeignKeys() {
+let createForeignKeys = () => {
   return dbt.none('ALTER TABLE nearby ADD CONSTRAINT place_id FOREIGN KEY (place_id) REFERENCES restaurants; ALTER TABLE nearby ADD CONSTRAINT fk FOREIGN KEY (place_id) REFERENCES restaurants (place_id);');
+}
+
+let createIndices = () => {
+  return dbt.none('CREATE INDEX index_nearby_recommended_placeid ON nearby (recommended); CREATE INDEX index_nearby_recommended_placeid ON nearby (place_id);');
 }
 
 async function seedTwoTables() {
@@ -288,7 +292,8 @@ async function seedTwoTables() {
     console.log(`Inserted ${batchesNeeded} batches, of batch size ${batchSize} into TABLE restaurants, in ${(endTimeRestaurant - startTimeRestaurant) / 1000 / 60} min`);
     console.log(`Inserted ${batchesNeeded} batches, of batch size ${batchSize} into TABLE nearby, in ${(endTimeNearby - startTimeNearby) / 1000 / 60} mins`);
     console.log('Creating foreign keys');
-    await createForeignKeys();
+    createForeignKeys();
+    await createIndices();
     console.log(`Total time: ${(new Date().getTime() - startTimeRestaurant) / 1000 / 60}`);
 }
 

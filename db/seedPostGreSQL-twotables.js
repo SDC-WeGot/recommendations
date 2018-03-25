@@ -1,66 +1,64 @@
-const faker = require ('faker');
-const MongoClient = require('mongodb').MongoClient;
+const pg = require('pg');
+const pgp = require('pg-promise')({
+  capSQL: true, // generate capitalized SQL
+});
+const faker = require('faker');
 
-// Connection URL
-const dbAddress = process.env.DB_ADDRESS || 'localhost:27017';
-const url = `mongodb://${dbAddress}`;
-// Database Name
-const dbName = 'sagat';
-
+// // Table creation script. We'll create a table by running the schema file instead.
+// const connectionString = process.env.DATABASE_URL || 'postgres://localhost:5432/sagat_sql';
+// const client = new pg.Client(connectionString);
+// client.connect();
+// const query = client.query(
+//   'CREATE TABLE restaurants (id SERIAL PRIMARY KEY,name TEXT NOT NULL,place_id UNIQUE NOT NULL,google_rating REAL NOT NULL,zagat_food_rating REAL NOT NULL,review_count INT NOT NULL,short_description TEXT NOT NULL,neighborhood TEXT NOT NULL,price_level SMALLINT NOT NULL,nearby PLACEHOLDER NOT NULL,type TEXT NOT NULL,location JSONB NOT NULL,photos JSONB NOT NULL)');
+//   query.on('end', () => { client.end(); });
+  
+  
+// const targetDatabaseSize = 8790000;
 const targetDatabaseSize = 10000000;
-const batchSize = 1000;
-let requiredBatches = targetDatabaseSize / batchSize;
-var startTime = new Date().getTime();
+let batchSize = 1000;
+const batchesNeeded = targetDatabaseSize / batchSize;
+let restaurantJobsLeft = targetDatabaseSize;
+let nearbyJobsLeft = targetDatabaseSize;
 
-// Use connect method to connect to the server
-MongoClient.connect(url, function(err, client) {
-  console.log("Connected successfully to mongo, inserting entries");
-  const db = client.db(dbName);
-  insertIntoDatabase(db, function() {
-    db.collection('restaurants').createIndex({place_id: 1});
-    console.log('Created index, closing client');
-    client.close();
-  });
+var startTimeRestaurant = new Date().getTime();
+var startTimeNearby = new Date().getTime();
+let endTimeRestaurant;
+let endTimeNearby;
+
+const db = pgp('postgres://localhost:5432/sagat_twotables'); // your database object
+const dbt = pgp({
+  database: 'sagat_twotables',
+  port: 5432,
 });
 
-// InsertMany function
-async function insertIntoDatabase (db, callback) {
-  // Get the documents collection
-  const collection = db.collection('restaurants');
-  // Create a batch of restaurants in arrRestaurants
-  let batchCounter = 0;
-  while (batchCounter < requiredBatches) {
-    // Insert prepared arrRestaurants
-    var arrRestaurants = [];
-    for (var i = 0; i < batchSize; i++) {
-      arrRestaurants.push(restaurantCreator(i, batchCounter));
-    }
-    // console.log('arrRestaurants.length =', arrRestaurants.length);
-    // console.log('arrRestaurants[0] = ', arrRestaurants[0]);
-    // console.log('collection.insertMany = ', collection.insertMany);
-    await collection.insertMany(arrRestaurants);
-    // console.log('in insertmanys callback');
-    batchCounter++;
-    if (batchCounter % 100 === 0) {
-      console.log(`Inserted batch ${batchCounter} of ${arrRestaurants.length} documents in ${(new Date().getTime() - startTime) / 1000} seconds, ${requiredBatches - batchCounter} batch[es] to go`);
-    }
-    if (batchCounter === requiredBatches) {
-      console.log(`Inserted ${batchCounter} batches, of batch size ${batchSize}, in ${(new Date().getTime() - startTime) / 1000 / 60}`);
-      callback();
-    }
-    // console.log('after collection insertmany');
-  }
-    // collection.insertMany(arrRestaurants, {ordered: false}).then(() => {
-    //   console.log('in insertmanys callback');
-    //   batchCounter++;
-    //   console.log(`Batch ${batchCounter} complete, inserted ${arrRestaurants.length} documents`);
-    //   if (batchCounter === insertionsNeeded) {
-    //     callback();
-    //   }
-    // });
-};
 
+// Creating a reusable/static ColumnSet for generating INSERT queries:
+const csRestaurant = new pgp.helpers.ColumnSet(
+  [
+    'business_name',
+    'google_rating',
+    'zagat_food_rating',
+    'review_count',
+    'short_description',
+    'neighborhood',
+    'price_level',
+    'business_type',
+    'longitude',
+    'latitude',
+    'photos',
+  ],
+  {table: 'restaurants'}
+);
 
+const csNearby = new pgp.helpers.ColumnSet(
+  [
+    'place_id',
+    'recommended',
+  ], 
+  {table: 'nearby'}
+);
+
+// helper functions to create an array of objects
 let randomIndexGenerator = (max) => {
   return Math.floor(Math.random() * max);
 };
@@ -68,17 +66,6 @@ let randomIndexGenerator = (max) => {
 let randomFloatGenerator = (max) => {
   let randomFloat = (Math.random() * max);
   return Math.round(randomFloat * 10) / 10;
-};
-
-const randomNearbyGenerator = (lowerLimit, upperLimit) => {
-  let usedIndices = [];
-  while (usedIndices.length < 6) {
-    let randomIndex = Math.floor(Math.random() * (upperLimit - lowerLimit)) + lowerLimit;
-    if (usedIndices.indexOf(randomIndex) === -1) {
-      usedIndices.push(randomIndex);
-    }
-  }
-  return usedIndices;
 };
 
 const randomPictureArr = () => {
@@ -140,12 +127,13 @@ const randomPictureArr = () => {
     'https://images.pexels.com/photos/373290/pexels-photo-373290.jpeg?h=350&auto=compress&cs=tinysrgb',
   ];
   var photosURLArray = [];
-  let usedPictureIndices = [];
+  // let usedPictureIndices = [];
+  let usedPictureIndices = {};
   while (photosURLArray.length < 10) {
     let randomIndex = randomIndexGenerator(dummyPhotos.length - 1);
-    if (usedPictureIndices.indexOf(randomIndex) === -1) {
+    if (usedPictureIndices[randomIndex] !== true) {
       photosURLArray.push(dummyPhotos[randomIndex]);
-      usedPictureIndices.push(randomIndex);
+      usedPictureIndices[randomIndex] = true;
     }
   }
   return photosURLArray;
@@ -156,32 +144,173 @@ const typeGenerator = () => {
   return types[randomIndexGenerator(types.length)];
 };
 
-const restaurantCreator = (counter, batchCounter) => {
+const restaurantCreator = (uniqueNumber) => {
   let photoArr = randomPictureArr();
   let randomDescription = faker.lorem.sentence();
   let randomPriceLevel = randomIndexGenerator(3) + 1;
   let randomGoogleRating = randomFloatGenerator(5);
   let randomZagatRating = randomFloatGenerator(5);
   let randomReviewCount = randomIndexGenerator(1000);
-  let randomNearby = randomNearbyGenerator((batchCounter * batchSize) + 1, ( (batchCounter + 1) * batchSize));
   let randomLongitude = faker.address.longitude();
   let randomLatitude = faker.address.latitude();
   let randomCounty = faker.address.county();
   let randomCompanyName = faker.company.companyName();
   let randomType = typeGenerator();
   let rest = {
-    name: randomCompanyName,
-    place_id: (batchCounter * batchSize + counter + 1),
+    business_name: randomCompanyName,
     google_rating: randomGoogleRating,
     zagat_food_rating: randomZagatRating,
     review_count: randomReviewCount,
     short_description: randomDescription,
     neighborhood: randomCounty,
     price_level: randomPriceLevel,
-    nearby: randomNearby,
-    type: randomType,
-    location: {"lat": randomLongitude, "long": randomLatitude},
+    business_type: randomType,
+    longitude: randomLongitude,
+    latitude: randomLatitude,
+    // Don't need 10
     photos: photoArr,
   };
   return rest;
 };
+
+// Fun to think up and figure out
+const randomRecommendedGenerator = (partnersIndex) => {
+  let indexCount = 0;
+  // data structure to prevent repeats
+  let indices = {};
+  let indexPairs = [];
+  while (indexCount < 6) {
+    let onePairing = {};
+    let randomIndexInBatch = Math.floor(Math.random() * targetDatabaseSize + 1);
+    if (indices[randomIndexInBatch] !== true) {
+      indices[randomIndexInBatch] = true;
+      indexCount++;
+      onePairing.place_id = partnersIndex;
+      onePairing.recommended = randomIndexInBatch;
+      indexPairs.push(onePairing);
+    }
+  }
+  return indexPairs;
+};
+
+function getNextDataRestaurant(t, pageIndex) {
+  let data = null;
+  if (pageIndex < batchesNeeded) {
+    if (restaurantJobsLeft < batchSize) {
+      batchSize = restaurantJobsLeft;
+    }
+    data = [];
+    for (let i = 1; i <= batchSize; i++) {
+      data.push(restaurantCreator());
+    }
+  }
+  return Promise.resolve(data);
+}
+
+function getNextDataNearby(t, pageIndex) {
+  let data = null;
+  let loopSize;
+  if (pageIndex < batchesNeeded) {
+    if (nearbyJobsLeft < batchSize) {
+      loopSize = nearbyJobsLeft;
+    } else {
+      loopSize = batchSize
+    }
+    data = [];
+    for (let j = 1; j <= loopSize; j++) {
+      const recommended = randomRecommendedGenerator(pageIndex * batchSize + j);
+      Array.prototype.push.apply(data, recommended);
+    }
+  }
+  return Promise.resolve(data);
+}
+
+let createForeignKeys = () => {
+  return dbt.none('ALTER TABLE nearby ADD CONSTRAINT place_id FOREIGN KEY (place_id) REFERENCES restaurants; ALTER TABLE nearby ADD CONSTRAINT fk FOREIGN KEY (place_id) REFERENCES restaurants (place_id);');
+}
+
+let createIndices = () => {
+  return dbt.none('CREATE INDEX index_nearby_recommended_placeid ON nearby (recommended); CREATE INDEX index_nearby_recommended_placeid ON nearby (place_id);');
+}
+
+async function seedTwoTables() {
+  nearbyCounter = 0;
+  db
+  .tx('massive-insert', t => {
+    return t.sequence(nearbyIndex => {
+      return getNextDataNearby(t, nearbyIndex).then(data => {
+        // PROBLEM HERE
+        if (data) {
+          nearbyJobsLeft = nearbyJobsLeft - batchSize;
+          nearbyCounter++;
+          const insert = pgp.helpers.insert(data, csNearby);
+          if (nearbyCounter % 100 === 0) {
+            console.log(`Inserted ${nearbyCounter} batches in ${(new Date().getTime() - startTimeNearby) / 1000 / 60} mins, ${batchesNeeded - nearbyCounter} left in TABLE nearby`);
+          }
+          return t.none(insert);
+        }
+      });
+    });
+  })
+  .then(data => {
+    endTimeNearby = new Date().getTime();
+    // console.log('Total batches:', data.total, ', Duration:', data.duration);
+  })
+  .catch(error => {
+    console.log(error);
+  });
+
+  let restaurantCounter = 0;
+  await
+  db
+    .tx('massive-insert', t => {
+      return t.sequence(batchCounter => {
+        return getNextDataRestaurant(t, batchCounter).then(data => {
+          if (data) {
+            restaurantJobsLeft = restaurantJobsLeft - batchSize;
+            restaurantCounter++;
+            const insert = pgp.helpers.insert(data, csRestaurant);
+            if (restaurantCounter % 100 === 0) {
+              console.log(`Inserted ${restaurantCounter} batches in ${(new Date().getTime() - startTimeRestaurant) / 1000 / 60} mins, ${batchesNeeded - restaurantCounter} left in TABLE restaurants`);
+            }
+            return t.none(insert);
+          }
+        });
+      });
+    })
+    .then(data => {
+      // COMMIT has been executed
+      endTimeRestaurant = new Date().getTime();
+      // console.log('Total batches:', data.total, ', Duration:', data.duration); /* data.duration is in ms */
+      // console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into TABLE restaurants, in ${(endTimeRestaurant - startTimeRestaurant) / 1000 / 60} min`);
+    })
+    .catch(error => {
+      // ROLLBACK has been executed
+      console.log(error);
+    });
+
+    console.log(`Inserted ${batchesNeeded} batches, of batch size ${batchSize} into TABLE restaurants, in ${(endTimeRestaurant - startTimeRestaurant) / 1000 / 60} min`);
+    console.log(`Inserted ${batchesNeeded} batches, of batch size ${batchSize} into TABLE nearby, in ${(endTimeNearby - startTimeNearby) / 1000 / 60} mins`);
+    console.log('Creating foreign keys');
+    createForeignKeys();
+    await createIndices();
+    console.log(`Total time: ${(new Date().getTime() - startTimeRestaurant) / 1000 / 60}`);
+}
+
+seedTwoTables()
+
+
+// Faulty mental model from mongo- an array of 1000 arrays of 6 numbers rather than one array of 6000 numbers
+// function getNextDataNearby(t, pageIndex) {
+//   let data = null;
+//   if (pageIndex < batchesNeeded) {
+//     console.log('pageIndex = ', pageIndex);
+//     console.log('batchesNeeded = ', batchesNeeded);
+//     data = [];
+//     for (let j = 0; j < batchSize; j++) {
+//       data.push(randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize));
+//     }
+//   }
+//   console.log('getNextDataNearby data.length = ', data.length)
+//   return Promise.resolve(data);
+// }

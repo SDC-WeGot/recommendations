@@ -9,18 +9,18 @@ var pgClient = new pg.Client(connectionString);
 pgClient.connect();
 
 let queryPG = async (identifier, callback) => {
-  // Connect to database
-  // var result = await pgClient.query('SELECT * FROM restaurants where place_id = ' + identifier + ";");
+  console.log('in queryPG');
   try {
+    console.log('in queryPG\'s success block');
     var result = await pgClient.query('SELECT * FROM restaurants INNER JOIN nearby ON restaurants.place_id = nearby.recommended INNER JOIN photos on photos.place_id = nearby.recommended WHERE nearby.place_id = ' + identifier + ';');
+    callback(null, result.rows);
   } catch(err) {
-    console.log(`Error = ${err}`);
+    console.log('in queryPG\'s catch block');
+    callback(err, null);
+    console.log(`Error = ${JSON.stringify(err)}`);
   }
-
-  // callback(`identifier = ${identifier} and result = ${result}`);
-  result.rows.forEach(row => {
-    // console.log(`row = ${JSON.stringify( row )}`);
-  });
+  console.log(`Postgres search results length = ${ result.rows.length }`);
+  callback(result.rows);
 };
 
 let randomIndexGenerator = (max) => {
@@ -39,16 +39,18 @@ let queryThousandTimes = () => {
     });
     if (i === 999) {
       var endTime = new Date().getTime();
-      console.log(
-        `${i + 1} random queries, time elapsed for postgres, 3 table format = ${endTime - startTime}`,
-      );
+      // console.log(
+      //   `${i + 1} random queries, time elapsed for postgres, 3 table format = ${endTime - startTime}`,
+      // );
     }
   }
 };
 
-queryThousandTimes(); // 11, 11, 11, 12, 13, 11
-pgClient.end();
+// queryThousandTimes(); // 11, 11, 11, 12, 13, 11
+// pgClient.end();
 // -- don't use *, be specific with fields- restaurants.longitude
 // SELECT * FROM restaurants INNER JOIN nearby ON restaurants.place_id = nearby.recommended WHERE nearby.place_id = 1;
 
 // SELECT * FROM restaurants INNER JOIN nearby ON restaurants.place_id = nearby.recommended INNER JOIN photos on photos.place_id = nearby.recommended WHERE nearby.place_id = 1;
+
+module.exports.queryPG = queryPG;

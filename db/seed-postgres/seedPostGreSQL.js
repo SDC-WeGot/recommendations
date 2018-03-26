@@ -173,7 +173,8 @@ const randomRecommendedGenerator = (partnersIndex) => {
   let indexCount = 0;
   // data structure to prevent repeats
   let indices = {};
-  let indexPairs = [];
+  // Initialize with own restaurant info to provide self-info
+  let indexPairs = [{place_id: partnersIndex, recommended: partnersIndex}];
   while (indexCount < 6) {
     let onePairing = {};
     let randomIndexInBatch = Math.floor(Math.random() * targetDatabaseSize + 1);
@@ -346,8 +347,6 @@ async function seedThreeTables() {
     .then(data => {
       // COMMIT has been executed
       endTimeRestaurant = new Date().getTime();
-      // console.log('Total batches:', data.total, ', Duration:', data.duration); /* data.duration is in ms */
-      // console.log(`Inserted ${data.total} batches, of batch size ${batchSize} into TABLE restaurants, in ${(endTimeRestaurant - startTimeRestaurant) / 1000 / 60} min`);
     })
     .catch(error => {
       // ROLLBACK has been executed
@@ -363,19 +362,3 @@ async function seedThreeTables() {
 }
 
 seedThreeTables()
-
-
-// Faulty mental model from mongo- an array of 1000 arrays of 6 numbers rather than one array of 6000 numbers
-// function getNextDataNearby(t, pageIndex) {
-//   let data = null;
-//   if (pageIndex < batchesNeeded) {
-//     console.log('pageIndex = ', pageIndex);
-//     console.log('batchesNeeded = ', batchesNeeded);
-//     data = [];
-//     for (let j = 0; j < batchSize; j++) {
-//       data.push(randomRecommendedGenerator(pageIndex * batchSize + 1, (pageIndex + 1) * batchSize));
-//     }
-//   }
-//   console.log('getNextDataNearby data.length = ', data.length)
-//   return Promise.resolve(data);
-// }

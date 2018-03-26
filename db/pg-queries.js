@@ -9,15 +9,12 @@ var pgClient = new pg.Client(connectionString);
 pgClient.connect();
 
 let queryPG = async (identifier, callback) => {
-  console.log('in queryPG');
   try {
-    console.log('in queryPG\'s success block');
     var result = await pgClient.query('SELECT * FROM restaurants INNER JOIN nearby ON restaurants.place_id = nearby.recommended INNER JOIN photos on photos.place_id = nearby.recommended WHERE nearby.place_id = ' + identifier + ';');
     callback(null, result.rows);
   } catch(err) {
-    console.log('in queryPG\'s catch block');
     callback(err, null);
-    console.log(`Error = ${JSON.stringify(err)}`);
+    console.log(`query error = ${JSON.stringify(err)}`);
   }
   console.log(`Postgres search results length = ${ result.rows.length }`);
   callback(result.rows);

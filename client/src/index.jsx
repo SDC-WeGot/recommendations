@@ -27,10 +27,7 @@ class App extends React.Component{
       method: 'GET',
       success: (data) => {
         console.log('get success from client!', data);
-        this.setState({
-          restaurant: data[0],
-          recommended: data[1]
-        });
+        this.repackageData(data);
       },
       error: (data) => {
         console.log('get error from client!', data);
@@ -43,10 +40,29 @@ class App extends React.Component{
     location.href = '/restaurants/' + id;
   }
 
+  repackageData(postgresData) {
+    let recommendedRestaurants = [];
+    while (recommendedRestaurants.length < 6) {
+      let restaurantObjectSeed = postgresData[((recommendedRestaurants.length + 1) * 10)];
+      restaurantObjectSeed.photos = [];
+      for (var i = 0; i < 10; i++) {
+        restaurantObjectSeed.photos.push(postgresData[i + (recommendedRestaurants.length * 10)].photo_url);
+        if (restaurantObjectSeed.photos.length === 10) {
+          recommendedRestaurants.push(restaurantObjectSeed);
+        }
+      }
+    }
+    console.table(recommendedRestaurants);
+    this.setState({
+      restaurant: recommendedRestaurants[0],
+      recommended: recommendedRestaurants,
+    });
+  }
+
   render(){
     return(
       <div>
-        <div className="recommendations-title">More Restaurants Near {this.state.restaurant ? this.state.restaurant.name : '...'}</div>
+        <div className="recommendations-title">More Restaurants Near {this.state.restaurant ? this.state.restaurant.business_name.toUpperCase() : '...'}</div>
         <div className="recommendations-container">
           {this.state.recommended.map((restaurant, index) => (
             <RestaurantCard restaurant={restaurant} key={index} switchRestaurant={this.goToRestaurant.bind(this)}/>

@@ -8,7 +8,7 @@
     "node": ">=6.13.0"
   },
   "scripts": {
-    "server": "nodemon ./server/index.js",
+    "server": "nodemon ./server/clusteredServer.js",
     "react-dev": "webpack -d --watch",
     "database": "mongod",
     "seed-database": "node ./db/seed.js",
@@ -16,7 +16,7 @@
     "create-pgtables": "psql -f ./db/models/pg-restaurant2.sql sagat_sql2",
     "seedPG": "npm run create-pgdatabase && npm run create-pgtables",
     "test": "jest",
-    "start": "nodemon ./server/index.js",
+    "start": "node ./server/index.js",
     "dockertest": "npm run seed-database && npm start",
     "docker": "DB_ADDRESS=database npm run seed-database && DB_ADDRESS=database npm start"
   },
@@ -28,9 +28,11 @@
     "cors": "^2.8.4",
     "express": "^4.14.0",
     "faker": "^4.1.0",
+    "ioredis": "^3.2.2",
     "jquery": "^3.1.1",
     "mongodb": "^3.0.4",
     "mongoose": "^4.6.4",
+    "newrelic": "^3.2.0",
     "pg": "^7.4.1",
     "pg-promise": "^8.2.2",
     "ramda": "^0.25.0",

@@ -6,6 +6,9 @@ const path = require('path');
 // const cors = require('cors');
 const dbController = require('../db/pgpromise-queries');
 const pg = require('pg');
+const Redis = require('ioredis');
+const redis = new Redis();
+
 const cluster = require('cluster');
 const numCPUs = require('os').cpus().length; // 4
 
@@ -25,15 +28,24 @@ app.get('/api/restaurants/:id/recommendations', function (req, res) {
   // console.log("GET " + req.url);
   // find recommended restaurants based on id
   var results = [];
-  dbController.queryPG(placeId, (err, data) => {
-    if (err, null) {
-      res.status(500);
-      console.log(`Error: ${err}`);
-    } else if (null, data) {
+  // dbController.queryPG(placeId, (err, data) => {
+  //   if (err, null) {
+  //     res.status(500);
+  //     console.log(`Error: ${err}`);
+  //   } else if (null, data) {
+  //     res.status(200);
+  //     res.send(data);
+  //   }
+  // });
+  dbController.queryPG(placeId)
+    .then(data => {
       res.status(200);
       res.send(data);
-    }
-  });
+    })
+    .catch(err => {
+      res.status(500);
+      console.log(`Error: ${err}`);
+    });
 });
 
 const masterProcess = () => {

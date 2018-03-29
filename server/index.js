@@ -4,12 +4,6 @@ const bodyParser = require('body-parser');
 const path = require('path');
 const cors = require('cors');
 const dbController = require('../db/pg-queries');
-const pg = require('pg');
-
-const dbAddress = process.env.DB_ADDRESS || 'localhost';
-var connectionString = `postgres://${dbAddress}:5432/sagat_sql`;
-var pgClient = new pg.Client(connectionString);
-pgClient.connect();
 
 
 app.use(cors());

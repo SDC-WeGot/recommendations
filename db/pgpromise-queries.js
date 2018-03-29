@@ -7,10 +7,9 @@ const db = pgp('postgres://localhost:5432/sagat_sql'); // your database object
 
 // db.any('SELECT * FROM product WHERE price BETWEEN $1 AND $2', [1, 10])
 
-let queryPG = async (identifier, callback) => {
+let queryPG = async (identifier) => {
   try {
     return await db.any('SELECT * FROM restaurants INNER JOIN nearby ON restaurants.place_id = nearby.recommended INNER JOIN photos on photos.place_id = nearby.recommended WHERE nearby.place_id = ${id}', {id: identifier});
-    // console.log('hihi result = ', result);
   } catch(err) {
     console.log(`queryPG error: ${err}`);
   }
@@ -36,7 +35,7 @@ let queryThousandTimes = async () => {
   }
 };
 
-// queryPG(1).then(() => {
+// queryPG(randomIndexGenerator(10000000)).then(() => {
 //   var endTime = new Date().getTime();
 //   console.log(`time elapsed for postgres, ddd3 table format = ${endTime - startTime}`)
 // });

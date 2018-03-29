@@ -18,14 +18,19 @@ redis.on('error', err => {
 
 const seedRedis = async () => {
   let counter = 1;
-  while (counter <= 2) {
-    let data = await dbController.queryPG(counter)
+  while (counter <= 1000) {
+    let data = await dbController.queryPG(counter);
     counter++;
-    console.log('data.length = ', data.length);
-    redis.sadd(counter.toString(), data.toString());
+    counterAsString = counter.toString();
+    dataToString = JSON.stringify(data);
+    redis.set(counter, dataToString);
   }
-  redis.smembers('1').then(result => {
-    console.log(`result = ${result}`);
+  redis.get('1')
+  .then(result => {
+    console.log(`result = ${JSON.parse(result)}`);
+  })
+  .catch(err => {
+    console.log('Error retrieving redis: ', err);
   })
   console.log('Finished seeding Redis');
 };

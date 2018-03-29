@@ -5,6 +5,7 @@ const app = express();
 const path = require('path');
 // const cors = require('cors');
 const dbController = require('../db/pgpromise-queries');
+const handleRequest = require('./requestHandler');
 const pg = require('pg');
 const Redis = require('ioredis');
 const redis = new Redis();
@@ -37,7 +38,7 @@ app.get('/api/restaurants/:id/recommendations', function (req, res) {
   //     res.send(data);
   //   }
   // });
-  dbController.queryPG(placeId)
+  handleRequest(placeId)
     .then(data => {
       res.status(200);
       res.send(data);

@@ -59,6 +59,8 @@ typings/
 
 #webpack bundle
 client/dist/bundle.js
+client/dist/app.js
+client/dist/app-server.js
 client/dist/bundle.js.map
 
 #api key

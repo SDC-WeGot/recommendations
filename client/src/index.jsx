@@ -4,7 +4,7 @@ import RestaurantCard from './components/RestaurantCard.jsx'
 import $ from 'jquery';
 import '../dist/styles.css';
 
-class App extends React.Component{
+export default class App extends React.Component{
   constructor(props){
     super(props);
     this.state = {

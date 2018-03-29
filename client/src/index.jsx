@@ -27,7 +27,12 @@ class App extends React.Component{
       method: 'GET',
       success: (data) => {
         console.log('get success from client!', data);
-        this.repackageData(data);
+        if (!Array.isArray(data)) {
+          this.repackageData(JSON.parse(data));          
+        } else {
+          console.log('data = ', data);
+          this.repackageData(data);
+        }
       },
       error: (data) => {
         console.log('get error from client!', data);
@@ -54,7 +59,7 @@ class App extends React.Component{
     }
     console.table(recommendedRestaurants);
     this.setState({
-      restaurant: recommendedRestaurants[0],
+      restaurant: postgresData[0],
       recommended: recommendedRestaurants,
     });
   }

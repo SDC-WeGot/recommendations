@@ -2,7 +2,7 @@ import React from 'react';
 import ReactDOM  from 'react-dom';
 import RestaurantCard from './components/RestaurantCard.jsx'
 import $ from 'jquery';
-import '../dist/styles.css';
+// import '../dist/styles.css';
 
 export default class App extends React.Component{
   constructor(props){
@@ -19,6 +19,7 @@ export default class App extends React.Component{
 
   getRecommendedRestaurants(){
     // console.log(window.location.href);
+    console.log('Client making api call');
     var id = window.location.href.split('/')[4];
     console.log('getting recommended restaurants for id: ' + id)
 
@@ -28,9 +29,11 @@ export default class App extends React.Component{
       success: (data) => {
         console.log('get success from client!', data);
         if (!Array.isArray(data)) {
-          this.repackageData(JSON.parse(data));          
+          this.repackageData(JSON.parse(data));
+          console.log('Data from Redis arrived!');         
         } else {
-          console.log('data = ', data);
+          // console.log('data = ', data);
+          console.log('Data from PostgreSQL arrived!');
           this.repackageData(data);
         }
       },
@@ -78,4 +81,4 @@ export default class App extends React.Component{
   }
 }
 
-ReactDOM.render(<App />, document.getElementById('recommendations-app'));
+// ReactDOM.render(<App />, document.getElementById('recommendations-app'));

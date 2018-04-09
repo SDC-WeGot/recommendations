@@ -20,25 +20,33 @@ const seedRedis = async () => {
   let counter = 1;
   while (counter <= 1000) {
     let data = await dbController.queryPG(counter);
-    counter++;
+    // console.log(`data = ${data}`)
     counterAsString = counter.toString();
     dataToString = JSON.stringify(data);
-    redis.set(counter, dataToString);
+    redis.set(counterAsString, dataToString);
+    counter++;
+    if (counter % 100 === 0) {
+      console.log(counter);
+    }
   }
-  redis.get('1')
-  .then(result => {
-    console.log(`result = ${JSON.parse(result)}`);
-  })
-  .catch(err => {
-    console.log('Error retrieving redis: ', err);
-  })
+  // redis.get('1')
+  // .then(result => {
+  //   console.log(`result = ${result}`);
+  //   // console.log(`JSON.parse(result) = ${JSON.parse(result)}`);
+  // })
+  // .catch(err => {
+  //   console.log('Error retrieving redis: ', err);
+  // })
   console.log('Finished seeding Redis');
 };
 
 seedRedis();
-// dbController.queryPG(1, (data) => {console.log(data)});
-// redis.get('1');
 
+// redis.set('1', 'new');
+// redis.get('1')
+//   .then(result => {
+//     console.log(`result = ${result}`);
+//   })
 
 // 85% = 50
 // 10% = 1000

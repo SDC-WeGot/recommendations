@@ -1,14 +1,17 @@
 config:
   target: 'http://localhost:3004'
   processor: './artillery-scripts.js'
-  pool: 6
+  # pool: 6
   phases:
-    - duration: 20
-      arrivalRate: 20
-      rampTo: 40
+    # - duration: 20
+    #   arrivalRate: 20
+    #   rampTo: 40
+    - duration: 60
+      arrivalRate: 250
   # defaults:
   #   headers:
   #     x-my-service-auth: '987401838271002188298567'
+  # Realistic web traffic- 80% of users ≥going to 50, 15% going to 1000, 5% for the rest
 scenarios:
   - name: 'Users landing on a page'
     flow:

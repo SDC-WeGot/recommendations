@@ -14,15 +14,18 @@
     "seed-database": "node ./db/seed.js",
     "create-pgdatabase": "psql -f ./db/models/create-pg-db.sql",
     "create-pgtables": "psql -f ./db/models/pg-restaurant2.sql sagat_sql2",
+    "redis": "redis-server",
     "seedPG": "npm run create-pgdatabase && npm run create-pgtables",
     "test": "jest",
     "start": "node ./server/index.js",
     "dockertest": "npm run seed-database && npm start",
-    "docker": "DB_ADDRESS=database npm run seed-database && DB_ADDRESS=database npm start"
+    "docker": "DB_ADDRESS=database npm run seed-database && DB_ADDRESS=database npm start",
+    "artillery": "artillery run ./tests/artillery/loadtest-pg.yml"
   },
   "dependencies": {
     "axios": "^0.18.0",
     "babel-core": "^6.17.0",
+    "babel-preset-env": "^1.6.1",
     "bluebird": "^3.5.1",
     "body-parser": "^1.15.2",
     "cors": "^2.8.4",

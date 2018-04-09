@@ -83,10 +83,10 @@ let randomIndexGenerator = (max) => {
 
 var startTime = new Date().getTime();
 
-let queryThousandTimes = (callback) => {
+let queryThousandTimes = async (callback) => {
   for (var i = 0; i < 1000; i++) {
     let randomIndex = randomIndexGenerator(10000000);
-    findNearby(randomIndex, (data) => {
+    await findNearby(randomIndex, (data) => {
       // console.log(`data = ${JSON.stringify(data)}`);
     });
     if (i === 999) {
@@ -96,5 +96,5 @@ let queryThousandTimes = (callback) => {
   }
 }
 
-queryThousandTimes();
+// queryThousandTimes();
 // 563, 467, 464, 511, 458, 448, 464

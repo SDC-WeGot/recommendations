@@ -8,13 +8,13 @@ let handleRequest = async (id) => {
     if (err) {
       console.error(err);
     } else if (result !== null) {
-      console.log('Found cached');
+      // console.log('Found cached');
     }
   });
   // console.log('redisResult = ', redisResult);
   // If not in redis cache, redisResult = null
   if (!redisResult) {
-    console.log('Looking in postgres');
+    // console.log('Data not cached, looking in postgres');
     return dbController.queryPG(id);
   }
   // Only returns here if redisResult !== null
